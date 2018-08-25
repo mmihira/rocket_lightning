@@ -1,0 +1,26 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: exampl
+    volumes:
+       - rocket_postgres_db:/var/lib/postgresql/data
+    networks:
+       - rocket_net
+  server:
+    build:
+      dockerfile: ./Dockerfile
+      context: ../server/
+    ports:
+      - 8000:8000
+volumes:
+   rocket_postgres_db:
+     driver: local
+networks:
+  rocket_net:
+
+
