@@ -1,0 +1,9 @@
+{
+  "postgres": {
+    "user_name": "postgres",
+    "password": "exampl",
+    "port": 5432,
+    "host": "localhost",
+    "no_attempt_reconnect_startup": 10
+  }
+}

@@ -1,0 +1,39 @@
+use ::schema;
+use ::schema::candle_period;
+use ::schema::candle_period::dsl::candle_period as candle_period_dsl;
+use diesel::prelude::{PgConnection};
+use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+
+use analysis_range::period::{Period, PeriodIdentity};
+
+#[table_name="candle_period"]
+#[derive(Debug, Queryable, Insertable)]
+pub struct CandlePeriod {
+    pub id: i32,
+    pub period_name: String
+}
+
+impl CandlePeriod {
+    pub fn init(conn: &PgConnection) {
+        let periods = vec![
+            CandlePeriod {id: Period::OneMin as i32, period_name: String::from("one_min")},
+            CandlePeriod {id: Period::FiveMin as i32, period_name: String::from("five_min")},
+            CandlePeriod {id: Period::FifteenMin as i32, period_name: String::from("fifteen_min")},
+        ];
+
+        periods
+            .iter()
+            .for_each(|period| { period.save_as_new(conn); });
+    }
+
+    pub fn save_as_new(&self, conn: &PgConnection) ->  Result<CandlePeriod, ::diesel::result::Error> {
+        ::diesel::insert_into(candle_period::table)
+            .values(self)
+            .get_result::<CandlePeriod>(conn)
+    }
+
+    pub fn get_period(&self) -> Period {
+        self.id.period()
+    }
+}
+

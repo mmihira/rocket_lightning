@@ -1,7 +1,9 @@
 version: '3'
 services:
   postgres:
-    image: postgres
+    build:
+      dockerfile: ./Dockerfile
+      context: ./postgres/
     ports:
       - 5432:5432
     restart: always
@@ -11,12 +13,23 @@ services:
        - rocket_postgres_db:/var/lib/postgresql/data
     networks:
        - rocket_net
-  server:
-    build:
-      dockerfile: ./Dockerfile
-      context: ../server/
+  # server:
+  #   build:
+  #     dockerfile: ./Dockerfile
+  #     context: ../server/
+  #   ports:
+  #     - 8000:8000
+  pgadmin:
+    image: dpage/pgadmin4
+    links:
+      - postgres:postgres
+    environment:
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_DEFAULT_EMAIL: admin@x.com
     ports:
-      - 8000:8000
+      - 5050:80
+    networks:
+      - rocket_net
 volumes:
    rocket_postgres_db:
      driver: local

@@ -11,3 +11,7 @@ fn hello(name: String, age: u8) -> String {
 fn main() {
     rocket::ignite().mount("/hello", routes![hello]).launch();
 }
+
+fn test() {
+    return "This is a test function";
+}
