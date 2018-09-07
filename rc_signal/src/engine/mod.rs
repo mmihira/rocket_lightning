@@ -1,3 +1,5 @@
+pub mod moving_avg;
+
 use chrono::{Utc, Timelike, Duration};
 use feed;
 use feed::PollTrades;
@@ -7,8 +9,9 @@ use diesel::{Identifiable};
 use diesel::result::Error as DieselError;
 use diesel::result::DatabaseErrorKind::UniqueViolation;
 use models::{Trade, Candle};
-use analysis_range::{TimeRange, Period};
+use analysis_range::{TimePeriod, Period};
 use analysis_range;
+use std;
 
 pub struct Engine<'a> {
     from: TimeStamp,
@@ -54,7 +57,7 @@ impl<'a> Engine<'a> {
         self.create_candle_for_range(&range.previous_range());
     }
 
-    fn create_candle_for_range<T: analysis_range::TimeRange>(&self, range: &T) -> Result<Candle, DieselError> {
+    fn create_candle_for_range<T: std::fmt::Debug + analysis_range::TimePeriod>(&self, range: &T) -> Result<Candle, DieselError> {
         let t_in_range = Trade::in_timestamp_range(
             self.conn,
             range.range_start(),
@@ -91,7 +94,7 @@ impl<'a> Engine<'a> {
         };
 
         let nc = Candle {
-            period: 1,
+            period: range.period() as i32,
             start_time: range.range_start(),
             end_time: range.range_end(),
             open: open,

@@ -1,7 +1,7 @@
 use super::one_min;
-use super::{TimeRange};
+use super::{TimePeriod};
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Debug, Eq, Clone, Copy)]
 pub enum Period {
     OneMin,
     FiveMin,
@@ -36,12 +36,10 @@ impl PeriodIdentity for PeriodId {
 }
 
 impl Period {
-    pub fn analysis_range(&self) -> impl TimeRange {
-        match *self {
+    pub fn analysis_range(self) -> impl TimePeriod {
+        match self {
             Period::OneMin => one_min::OneMin::new(),
             _ => one_min::OneMin::new()
         }
     }
 }
-
-

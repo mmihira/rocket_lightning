@@ -28,20 +28,20 @@ pub struct Candle {
 }
 
 impl Candle{
-    pub fn save_as_new(&self, conn: &PgConnection) ->  Result<Candle, DieselError> {
+    pub fn save_as_new(&self, conn: &PgConnection) ->  Result<Self, DieselError> {
         ::diesel::insert_into(candles::table)
             .values(self)
             .get_result(conn)
     }
 
-    pub fn update(&self, conn: &PgConnection) -> Result<Candle, DieselError> {
+    pub fn update(&self, conn: &PgConnection) -> Result<Self, DieselError> {
         ::diesel::update(self)
             .set(self)
             .get_result(conn)
     }
 
-    pub fn save_or_update(&self, conn: &PgConnection) -> Result<Candle, DieselError> {
-        let exists = candles_dsl.find(self.id()).get_result::<Candle>(conn);
+    pub fn save_or_update(&self, conn: &PgConnection) -> Result<Self, DieselError> {
+        let exists = candles_dsl.find(self.id()).get_result::<Self>(conn);
 
         match exists {
             Ok(existing) => self.update(conn),

@@ -16,9 +16,9 @@ pub struct CandlePeriod {
 impl CandlePeriod {
     pub fn init(conn: &PgConnection) {
         let periods = vec![
-            CandlePeriod {id: Period::OneMin as i32, period_name: String::from("one_min")},
-            CandlePeriod {id: Period::FiveMin as i32, period_name: String::from("five_min")},
-            CandlePeriod {id: Period::FifteenMin as i32, period_name: String::from("fifteen_min")},
+            Self {id: Period::OneMin as i32, period_name: String::from("one_min")},
+            Self {id: Period::FiveMin as i32, period_name: String::from("five_min")},
+            Self {id: Period::FifteenMin as i32, period_name: String::from("fifteen_min")},
         ];
 
         periods
@@ -26,10 +26,10 @@ impl CandlePeriod {
             .for_each(|period| { period.save_as_new(conn); });
     }
 
-    pub fn save_as_new(&self, conn: &PgConnection) ->  Result<CandlePeriod, ::diesel::result::Error> {
+    pub fn save_as_new(&self, conn: &PgConnection) ->  Result<Self, ::diesel::result::Error> {
         ::diesel::insert_into(candle_period::table)
             .values(self)
-            .get_result::<CandlePeriod>(conn)
+            .get_result::<Self>(conn)
     }
 
     pub fn get_period(&self) -> Period {
