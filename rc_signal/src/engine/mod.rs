@@ -1,9 +1,8 @@
 pub mod moving_avg;
 
-use chrono::{Utc, Timelike, Duration};
 use feed;
 use feed::PollTrades;
-use timestamp::{TimeStamp, TimeStampRange,  Conversions};
+use timestamp::{TimeStamp, Conversions};
 use diesel::prelude::{PgConnection};
 use diesel::{Identifiable};
 use diesel::result::Error as DieselError;
@@ -53,7 +52,39 @@ impl<'a> Engine<'a> {
     fn do_range(&self, period: Period) {
         // Can't assign a type to range yet
         let range = period.analysis_range();
-        self.create_candle_for_range(&range);
+        self.create_candle_for_range(&range)
+            .map_err(|err: DieselError| {
+                format!(
+                    "When creating candle for period {:?}, got error = {:?}",
+                    range,
+                    err
+                    );
+            })
+            .map(|mut candle| {
+                let moving_avg_result = moving_avg::period_9(self.conn, &range)
+                    .map_err(|err| { error!("sma_9 error: {} .. continuing with default set", err); ()})
+                    .unwrap_or(0f32);
+                candle.sma_9 = moving_avg_result;
+                candle
+            })
+            .and_then(|ref candle| {
+                candle
+                    .update(self.conn)
+                    .map_err(|err: DieselError| {
+                        format!(
+                            "When updating candle for period {:?}, got error = {:?}",
+                            range,
+                            err
+                            );
+                    })
+            })
+            .map(|ref candle| {
+                info!("Candle created and updated")
+            })
+            .map_err(|err| {
+                error!("{:?}", err)
+            });
+
         self.create_candle_for_range(&range.previous_range());
     }
 

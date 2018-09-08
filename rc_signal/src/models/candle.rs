@@ -1,10 +1,10 @@
 use timestamp::{TimeStamp};
-use ::schema;
 use ::schema::candles;
 use ::schema::candles::dsl::candles as candles_dsl;
 use diesel::prelude::{PgConnection};
 use diesel::{Identifiable, ExpressionMethods, QueryDsl, RunQueryDsl, BoolExpressionMethods};
 use diesel::result::Error as DieselError;
+use analysis_range::period::{ Period, PeriodIdentity };
 
 #[table_name="candles"]
 #[primary_key(period, start_time, end_time)]
@@ -47,5 +47,15 @@ impl Candle{
             Ok(existing) => self.update(conn),
             Err(_) => self.save_as_new(conn)
         }
+    }
+
+    pub fn in_range(conn: &PgConnection, period: Period, start: TimeStamp, end: TimeStamp) -> Result<Vec<Self>, DieselError> {
+        candles_dsl.filter(
+            candles::start_time.ge(start)
+                .and(candles::end_time.le(end))
+                .and(candles::period.eq(period as i32))
+            )
+            .order_by(candles::start_time.desc())
+            .get_results::<Self>(conn)
     }
 }

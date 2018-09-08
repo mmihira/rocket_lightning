@@ -1,10 +1,9 @@
-use ::schema;
 use ::schema::candle_period;
-use ::schema::candle_period::dsl::candle_period as candle_period_dsl;
+// use ::schema::candle_period::dsl::candle_period as candle_period_dsl;
 use diesel::prelude::{PgConnection};
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::{ExpressionMethods, RunQueryDsl};
 
-use analysis_range::period::{Period, PeriodIdentity};
+use analysis_range::{Period, PeriodIdentity };
 
 #[table_name="candle_period"]
 #[derive(Debug, Queryable, Insertable)]

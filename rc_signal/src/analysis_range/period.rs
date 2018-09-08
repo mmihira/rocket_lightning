@@ -3,8 +3,8 @@ use super::{TimePeriod};
 
 #[derive(PartialEq, Debug, Eq, Clone, Copy)]
 pub enum Period {
-    OneMin,
-    FiveMin,
+    OneMin = 1isize,
+    FiveMin = 2isize,
     FifteenMin,
     ThirtyMin,
     OneHour,
@@ -24,12 +24,12 @@ pub trait PeriodIdentity {
 impl PeriodIdentity for PeriodId {
     fn period(self) -> Period {
         match self {
-            1 => Period::OneMin,
-            2 => Period::FiveMin,
-            3 => Period::FifteenMin,
-            4 => Period::ThirtyMin,
-            5 => Period::OneHour,
-            6 => Period::FourHour,
+            _ if self == (Period::OneMin as i32) => Period::OneMin,
+            _ if self == (Period::FiveMin as i32) => Period::FiveMin,
+            _ if self == (Period::FifteenMin as i32) => Period::FifteenMin,
+            _ if self == (Period::ThirtyMin as i32) => Period::ThirtyMin,
+            _ if self == (Period::OneHour as i32) => Period::OneHour,
+            _ if self == (Period::FourHour as i32)  => Period::FourHour,
             _ => panic!("not a period")
         }
     }

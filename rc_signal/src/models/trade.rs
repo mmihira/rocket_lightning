@@ -1,4 +1,3 @@
-use ::schema;
 use ::schema::trades;
 use diesel::prelude::{PgConnection};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};

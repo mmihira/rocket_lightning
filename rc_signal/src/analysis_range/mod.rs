@@ -2,17 +2,16 @@ pub mod one_min;
 pub mod five_min;
 pub mod period;
 use timestamp::{ TimeStamp };
-use self::period::{PeriodIdentity};
 use std;
 
 pub use self::one_min::OneMin;
-pub use self::period::{Period};
+pub use self::period::{Period, PeriodIdentity};
 
 #[derive(Debug)]
 pub struct TimeRange<T: TimePeriod> {
-    range: Vec<T>,
-    start_timestamp: TimeStamp,
-    end_timestamp: TimeStamp
+    pub range: Vec<T>,
+    pub start_timestamp: TimeStamp,
+    pub end_timestamp: TimeStamp
 }
 
 pub trait TimePeriod: std::marker::Sized + std::fmt::Debug {

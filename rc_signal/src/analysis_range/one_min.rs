@@ -1,4 +1,4 @@
-use timestamp::{ TimeStamp, TimeStampRange };
+use timestamp::{ TimeStamp };
 use chrono::{Utc, Timelike, Duration, TimeZone, NaiveDateTime};
 use super::TimePeriod;
 use chrono::offset;
