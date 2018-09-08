@@ -61,10 +61,27 @@ impl<'a> Engine<'a> {
                     );
             })
             .map(|mut candle| {
-                let moving_avg_result = moving_avg::period_9(self.conn, &range)
+                candle.sma_9  = moving_avg::period_9(self.conn, &range)
                     .map_err(|err| { error!("sma_9 error: {} .. continuing with default set", err); ()})
                     .unwrap_or(0f32);
-                candle.sma_9 = moving_avg_result;
+                Box::new(candle) // Box it up so we only have to propagate the box
+            })
+            .map(|mut candle| {
+                candle.sma_12 = moving_avg::period_12(self.conn, &range)
+                    .map_err(|err| { error!("sma_12 error: {} .. continuing with default set", err); ()})
+                    .unwrap_or(0f32);
+                candle
+            })
+            .map(|mut candle| {
+                candle.sma_26 = moving_avg::period_26(self.conn, &range)
+                    .map_err(|err| { error!("sma_26 error: {} .. continuing with default set", err); ()})
+                    .unwrap_or(0f32);
+                candle
+            })
+            .map(|mut candle| {
+                candle.ema_9 = moving_avg::ema_period_9(self.conn, &range)
+                    .map_err(|err| { error!("ema_9 error: {} .. continuing with default set", err); ()})
+                    .unwrap_or(0f32);
                 candle
             })
             .and_then(|ref candle| {

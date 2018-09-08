@@ -26,6 +26,7 @@ pub struct NewTrade {
 impl Trade {
     pub fn in_timestamp_range(conn: &PgConnection, start: TimeStamp, end: TimeStamp) -> Vec<Self> {
         trades_dsl.filter(trades::timestamp.between(start, end))
+            .order_by(trades::timestamp.asc())
             .get_results::<Self>(conn)
             .unwrap()
     }
