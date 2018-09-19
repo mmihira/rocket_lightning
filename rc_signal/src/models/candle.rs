@@ -67,6 +67,9 @@ impl Candle{
         }
     }
 
+    /**
+     * Order by first being the latest candle
+     */
     pub fn in_range(conn: &PgConnection, period: Period, start: TimeStamp, end: TimeStamp) -> Result<Vec<Self>, DieselError> {
         candles_dsl.filter(
             candles::start_time.ge(start)

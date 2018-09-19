@@ -19,6 +19,13 @@ pub fn ema_period_9<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<f32
     ema_for_interval(conn, 9, range)
 }
 
+pub fn ema_period_12<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<f32, String> {
+    ema_for_interval(conn, 12, range)
+}
+
+pub fn ema_period_26<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<f32, String> {
+    ema_for_interval(conn, 26, range)
+}
 
 fn sma_for_interval<T: TimePeriod>(conn: &PgConnection, interval: i64, range: &T) -> Result<f32, String> {
     let period_range = range.get_prev_period_time_range(interval);

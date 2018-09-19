@@ -1,4 +1,5 @@
 pub mod moving_avg;
+pub mod rsi;
 
 use feed;
 use feed::PollTrades;
@@ -81,6 +82,12 @@ impl<'a> Engine<'a> {
             .map(|mut candle| {
                 candle.ema_9 = moving_avg::ema_period_9(self.conn, &range)
                     .map_err(|err| { error!("ema_9 error: {} .. continuing with default set", err); ()})
+                    .unwrap_or(0f32);
+                candle
+            })
+            .map(|mut candle| {
+                candle.rsi = rsi::rsi_for_interval(self.conn, &range)
+                    .map_err(|err| { error!("rsi error: {} .. continuing with default set", err); ()})
                     .unwrap_or(0f32);
                 candle
             })
