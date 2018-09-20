@@ -4,3 +4,6 @@ rocket_rc
 [docker]
 rocket_rc
 
+[rc_signal]
+rocket_rc
+

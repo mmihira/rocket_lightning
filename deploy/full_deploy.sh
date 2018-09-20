@@ -36,6 +36,7 @@ rm ansible/playbooks/*.retry
 to_run=( \
         "docker" \
         "global_env" \
+        "rc_signal" \
         )
 
 containsElement "docker" "${to_run[@]}"
@@ -60,3 +61,18 @@ if [ $? -eq 0 ]; then
                     --extra-vars "@${!vault_file}" \
                     --extra-vars "@${!deployed_node_config}"
 fi
+
+containsElement "rc_signal" "${to_run[@]}"
+if [ $? -eq 0 ]; then
+  echo "Installing rc_signal"
+  echo "--------------------------------------------------------------"
+  ./ansible/roles/rc_signal/scripts/tar_context.sh
+  ansible-playbook -s ./ansible/playbooks/rc_signal.yml \
+                    -i "${!ansible_hosts}" \
+                    --ssh-common-args="-F ${!ssh_config}" \
+                    --vault-password-file "${!vault_key_file}" \
+                    --extra-vars "@${!vault_file}" \
+                    --extra-vars "@${!deployed_node_config}"
+fi
+
+

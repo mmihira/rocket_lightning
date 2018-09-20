@@ -9,7 +9,8 @@
       },
       "attach_volume": false,
       "ansible_host_groups": [
-        "docker"
+        "docker",
+        "rc_signal"
       ],
       "env_injection": [
       ]

@@ -1,0 +1,4 @@
+---
+- hosts: 'rc_signal'
+  roles:
+    - ../roles/rc_signal

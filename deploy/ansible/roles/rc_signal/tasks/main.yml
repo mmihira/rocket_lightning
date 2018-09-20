@@ -1,0 +1,51 @@
+---
+- name: rocket_rc user
+  user:
+    name: rocket_rc
+    shell: /bin/bash
+    comment: "rocket_rc"
+    system: 'yes'
+
+- name: Copy archives
+  become: true
+  become_user: rocket_rc
+  copy:
+    src: /tmp/docker_rocket_rc/rc_signal.gzip
+    dest: /home/rocket_rc
+    force: yes
+
+- name: Unarchive
+  become: true
+  become_user: rocket_rc
+  shell: tar -Pzxvf /home/rocket_rc/rc_signal.gzip -C /home/rocket_rc
+
+- name: Copy over env file
+  template:
+    src: ./templates/env.env
+    dest: /home/rocket_rc/
+    owner: rocket_rc
+    group: rocket_rc
+    mode: 0400
+
+- name: Stop
+  become: true
+  become_user: root
+  shell: "docker stop rocket_rc_docker"
+  ignore_errors: yes
+
+- name: Remove
+  become: true
+  become_user: root
+  shell: "docker rm rocket_rc_docker"
+  ignore_errors: yes
+
+- name: Docker build
+  become: true
+  become_user: root
+  shell: "cd /home/rocket_rc; docker build -t rc_signal ./"
+
+- name: Run
+  become: true
+  become_user: root
+  script: ./scripts/run.sh
+
