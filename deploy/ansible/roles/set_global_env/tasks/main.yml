@@ -1,0 +1,8 @@
+---
+- name: add {{item}} to path
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    insertafter: 'EOF'
+    line: '{{item}}'
+  with_items: "{{nodes[inventory_hostname]['env_injection']}}"

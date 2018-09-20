@@ -1,0 +1,19 @@
+{
+  "nodes": {
+    "rocket_rc" : {
+      "ami": "ami-96666ff5",
+      "security_groups": ["ssh2"],
+      "type": "t2.micro",
+      "tags": {
+        "name": "rocket_rc"
+      },
+      "attach_volume": false,
+      "ansible_host_groups": [
+        "docker"
+      ],
+      "env_injection": [
+      ]
+    }
+  }
+}
+

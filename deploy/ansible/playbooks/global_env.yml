@@ -1,0 +1,4 @@
+---
+- hosts: 'global_env'
+  roles:
+    - ../roles/set_global_env
