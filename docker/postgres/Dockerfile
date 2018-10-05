@@ -5,4 +5,5 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
  && dpkg-reconfigure -f noninteractive tzdata
 
 COPY postgresql.conf /etc/postgresql
+COPY init.sh /docker-entrypoint-initdb.d
 CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]

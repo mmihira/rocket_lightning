@@ -8,7 +8,7 @@ use analysis_range::{ Period, PeriodIdentity, TimePeriod };
 
 #[table_name="candles"]
 #[primary_key(period, start_time, end_time)]
-#[derive(Debug, Queryable, Identifiable, Insertable, AsChangeset)]
+#[derive(Debug, Deserialize, Queryable, Identifiable, Insertable, AsChangeset)]
 pub struct Candle {
     pub period: i32,
     pub start_time: TimeStamp,

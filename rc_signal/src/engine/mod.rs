@@ -51,9 +51,16 @@ impl<'a> Engine<'a> {
     }
 
     fn do_range(&self, period: Period) {
-        // Can't assign a type to range yet
         let range = period.analysis_range();
-        self.create_candle_for_range(&range)
+        self.calculate_candle_for_range(&range);
+        self.calculate_candle_for_range(&range.previous_range());
+    }
+
+    /**
+     * Create a candle for the range and calculates all values.
+     */
+    fn calculate_candle_for_range<T: std::fmt::Debug + analysis_range::TimePeriod>(&self, range: &T) {
+        self.init_candle_for_range(range)
             .map_err(|err: DieselError| {
                 format!(
                     "When creating candle for period {:?}, got error = {:?}",
@@ -62,31 +69,31 @@ impl<'a> Engine<'a> {
                     );
             })
             .map(|mut candle| {
-                candle.sma_9  = moving_avg::period_9(self.conn, &range)
+                candle.sma_9  = moving_avg::period_9(self.conn, range)
                     .map_err(|err| { error!("sma_9 error: {} .. continuing with default set", err); ()})
                     .unwrap_or(0f32);
                 Box::new(candle) // Box it up so we only have to propagate the box
             })
             .map(|mut candle| {
-                candle.sma_12 = moving_avg::period_12(self.conn, &range)
+                candle.sma_12 = moving_avg::period_12(self.conn, range)
                     .map_err(|err| { error!("sma_12 error: {} .. continuing with default set", err); ()})
                     .unwrap_or(0f32);
                 candle
             })
             .map(|mut candle| {
-                candle.sma_26 = moving_avg::period_26(self.conn, &range)
+                candle.sma_26 = moving_avg::period_26(self.conn, range)
                     .map_err(|err| { error!("sma_26 error: {} .. continuing with default set", err); ()})
                     .unwrap_or(0f32);
                 candle
             })
             .map(|mut candle| {
-                candle.ema_9 = moving_avg::ema_period_9(self.conn, &range)
+                candle.ema_9 = moving_avg::ema_period_9(self.conn, range)
                     .map_err(|err| { error!("ema_9 error: {} .. continuing with default set", err); ()})
                     .unwrap_or(0f32);
                 candle
             })
             .map(|mut candle| {
-                candle.rsi = rsi::rsi_for_interval(self.conn, &range)
+                candle.rsi = rsi::rsi_for_interval(self.conn, range)
                     .map_err(|err| { error!("rsi error: {} .. continuing with default set", err); ()})
                     .unwrap_or(0f32);
                 candle
@@ -108,11 +115,13 @@ impl<'a> Engine<'a> {
             .map_err(|err| {
                 error!("{:?}", err)
             });
-
-        self.create_candle_for_range(&range.previous_range());
     }
 
-    fn create_candle_for_range<T: std::fmt::Debug + analysis_range::TimePeriod>(&self, range: &T) -> Result<Candle, DieselError> {
+    /**
+     * Create a candle for the range.
+     * Initialising all the calculated indicators to their default values.
+     */
+    fn init_candle_for_range<T: std::fmt::Debug + analysis_range::TimePeriod>(&self, range: &T) -> Result<Candle, DieselError> {
         let t_in_range = Trade::in_timestamp_range(
             self.conn,
             range.range_start(),

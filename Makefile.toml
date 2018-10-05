@@ -1,0 +1,8 @@
+[tasks.reset_test]
+env = { "DATABASE_URL" = "postgres://postgres:exampl@localhost:5432/rocket_rc_test" }
+script = [
+'''
+	cd ./rc_signal/
+	diesel database reset
+'''
+]

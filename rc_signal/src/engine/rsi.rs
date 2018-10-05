@@ -35,7 +35,6 @@ pub fn rsi_for_interval<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result
         })
         .and_then(|candles| calc_avg_gain_loss(candles))
         .and_then(|GainLoss{ avg_gain, avg_loss, curr_loss, curr_gain }| {
-
             let prev_range = range.previous_range().get_prev_period_time_range(RSI_INTERVAL);
             let TimeRange {
                 start_timestamp: prev_start_timestamp,
@@ -115,5 +114,49 @@ pub fn calc_avg_gain_loss(candles: Vec<Candle>) -> Result<GainLoss, String> {
             })
         },
         len => Err(format!("Not enough data. Expected {}, got {}", RSI_INTERVAL, len))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use test_setup;
+    use std::fs::File;
+    use std::io::prelude::*;
+    use models::{Candle};
+    use serde_json;
+    use diesel::result::Error as DieselError;
+
+    #[test]
+    fn ok() {
+        let con = test_setup::setup().unwrap();
+
+        let z: Result<Vec<Result<Candle, DieselError>>, String> = File::open("./test/fixtures/rsi_candles.json")
+            .map_err(|err| err.to_string())
+            .map(|mut f| {
+                let mut contents = String::new();
+                f.read_to_string(&mut contents);
+                contents
+            })
+            .and_then(|contents: String| {
+                serde_json::from_str(&contents)
+                    .map(|x: Vec<Candle>| x)
+                    .map_err(|err| err.to_string())
+            })
+            .map(|candles: Vec<Candle>| {
+                candles
+                    .into_iter()
+                    .map(|candle| {
+                        candle.save_as_new(&con)
+                    })
+                    .collect()
+            })
+            .map_err(|err| {
+                println!("Error {}", err);
+                err
+            });
+
+        println!("{:?}", z);
+
+        assert_eq!(3, 4);
     }
 }

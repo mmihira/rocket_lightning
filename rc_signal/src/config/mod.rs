@@ -2,6 +2,7 @@
 pub struct Postgres {
     pub user_name: String,
     pub password: String,
+    pub database: String,
     pub port: i32,
     pub host: String,
     pub no_attempt_reconnect_startup: i32
@@ -9,6 +10,7 @@ pub struct Postgres {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub postgres: Postgres
+    pub postgres: Postgres,
+    pub postgres_test: Postgres
 }
 

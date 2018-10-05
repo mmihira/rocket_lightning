@@ -21,6 +21,7 @@ pub mod timestamp;
 pub mod feed;
 pub mod engine;
 pub mod analysis_range;
+pub mod test_setup;
 
 const CONFIG_FILE_NAME: &str = "config";
 
@@ -32,18 +33,17 @@ fn get_config() -> Result<config::Config, std_config::ConfigError> {
 }
 
 pub fn connect_postgres(config: &config::Config) -> PgConnection {
-
-    let connection_string = format!("postgres://postgres:{}@{}:{}",
+    let connection_string = format!("postgres://postgres:{}@{}:{}/{}",
         config.postgres.password,
         config.postgres.host,
-        config.postgres.port
+        config.postgres.port,
+        config.postgres.database
         );
 
     PgConnection::establish(&connection_string).expect(&format!("Error connecting to {}", &connection_string))
 }
 
 fn main() {
-    use schema::trades::dsl::*;
     pretty_env_logger::init();
     info!("rc_signal starting");
 
