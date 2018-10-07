@@ -6,10 +6,10 @@ use super::{Period, TimeRange};
 
 #[derive(Debug)]
 pub struct OneMin {
-    start_timestamp: TimeStamp,
-    end_timestamp: TimeStamp,
-    period: Period,
-    prior_start_timestamp: TimeStamp
+    pub start_timestamp: TimeStamp,
+    pub end_timestamp: TimeStamp,
+    pub period: Period,
+    pub prior_start_timestamp: TimeStamp
 }
 
 const SEC_DURATION: i64 = 60;
@@ -101,5 +101,76 @@ impl TimePeriod for OneMin {
             start_timestamp: start,
             end_timestamp: end,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use analysis_range::{OneMin, Period, TimeRange, TimePeriod};
+
+    #[test]
+    fn get_prev_period_range_for_one() {
+        let range = OneMin {
+            start_timestamp: 1538718120i64,
+            end_timestamp: 1538718180i64,
+            period: Period::OneMin,
+            prior_start_timestamp: 1538718060i64,
+        };
+
+        let prev_period_range = range.get_prev_period_range(1);
+        let starts: Vec<i64> = prev_period_range.iter().map(|candle| candle.start_timestamp).collect();
+        assert_eq!(starts, vec![ 1538718120 ]);
+    }
+
+    #[test]
+    fn get_prev_period_range_for_multiple() {
+        let range = OneMin {
+            start_timestamp: 1538718120i64,
+            end_timestamp: 1538718180i64,
+            period: Period::OneMin,
+            prior_start_timestamp: 1538718060i64,
+        };
+
+        let prev_period_range = range.get_prev_period_range(3);
+        let starts: Vec<i64> = prev_period_range.iter().map(|candle| candle.start_timestamp).collect();
+        assert_eq!(starts, vec![
+            1538718120,
+            1538718060,
+            1538718000,
+        ]);
+
+        let ends: Vec<i64> = prev_period_range.iter().map(|candle| candle.end_timestamp).collect();
+        assert_eq!(ends, vec![
+            1538718180,
+            1538718120,
+            1538718060,
+        ]);
+    }
+
+    #[test]
+    fn get_prev_period_time_range() {
+        let range = OneMin {
+            start_timestamp: 1538718120i64,
+            end_timestamp: 1538718180i64,
+            period: Period::OneMin,
+            prior_start_timestamp: 1538718060i64,
+        };
+
+        let time_range = range.get_prev_period_time_range(3);
+        assert_eq!(time_range.start_timestamp, 1538718000);
+        assert_eq!(time_range.end_timestamp, 1538718180);
+    }
+
+    #[test]
+    fn prev_range() {
+        let range = OneMin {
+            start_timestamp: 1538718120i64,
+            end_timestamp: 1538718180i64,
+            period: Period::OneMin,
+            prior_start_timestamp: 1538718060i64,
+        };
+        let prev_range = range.prev_range();
+        assert_eq!(prev_range.start_timestamp, 1538718060);
+        assert_eq!(prev_range.end_timestamp, 1538718120);
     }
 }

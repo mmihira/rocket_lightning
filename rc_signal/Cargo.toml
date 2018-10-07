@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["mmihira <mmihira.w@gmail.com>"]
 
 [dependencies]
+csv = "1"
 curl = "*"
 diesel = { version = "1.3.2", features = ["postgres"] }
 dotenv = "0.9.0"

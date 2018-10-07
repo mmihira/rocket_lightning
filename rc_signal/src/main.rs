@@ -8,6 +8,7 @@ extern crate pretty_env_logger;
 extern crate config as std_config;
 #[macro_use] extern crate diesel;
 extern crate dotenv;
+extern crate csv;
 
 use self::diesel::prelude::*;
 

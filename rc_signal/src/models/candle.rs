@@ -58,6 +58,10 @@ impl Candle{
             .get_result(conn)
     }
 
+    pub fn deleteAllRecords(conn: &PgConnection) {
+        ::diesel::delete(candles::table).execute(conn).unwrap();
+    }
+
     pub fn save_or_update(&self, conn: &PgConnection) -> Result<Self, DieselError> {
         let exists = candles_dsl.find(self.id()).get_result::<Self>(conn);
 
@@ -76,7 +80,7 @@ impl Candle{
                 .and(candles::end_time.le(end))
                 .and(candles::period.eq(period as i32))
             )
-            .order_by(candles::start_time.desc())
+            .order_by(candles::start_time.asc())
             .get_results::<Self>(conn)
     }
 

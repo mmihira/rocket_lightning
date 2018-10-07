@@ -146,7 +146,8 @@ impl<'a> Engine<'a> {
             };
         }
 
-        // We should be getting the close from the period before
+        // If therer are no trades we should be copying values from the period before
+        // Add a test to replicate this functionality
         open = match t_in_range.first() {
             Some(trade) => trade.price,
             None => 0f32

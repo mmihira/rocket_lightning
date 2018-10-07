@@ -4,7 +4,9 @@ use diesel::prelude::{PgConnection};
 use diesel::result::Error as DieselError;
 
 const RSI_INTERVAL: i64 = 14;
+const RSI_INTERVAL_CALC_RANGE: i64 = RSI_INTERVAL + 1;
 
+#[derive(Debug, PartialEq)]
 pub struct GainLoss {
     avg_gain: f32,
     avg_loss: f32,
@@ -12,49 +14,40 @@ pub struct GainLoss {
     curr_loss: f32
 }
 
-pub fn rsi_for_interval<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<f32, String> {
-    let period_range = range.get_prev_period_time_range(RSI_INTERVAL);
+pub fn candles_for_rsi_calc<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<Vec<Candle>, DieselError> {
+    let period_range = range.get_prev_period_time_range(RSI_INTERVAL + 1i64);
     let TimeRange { start_timestamp, end_timestamp, ..} = period_range;
 
-    let candles_in_range = Candle::in_range(
+    Candle::in_range(
         conn,
         range.period(),
         start_timestamp,
         end_timestamp
-    );
+    )
+}
 
-    candles_in_range
+pub fn rsi_for_interval<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<f32, String> {
+    candles_for_rsi_calc(conn, range)
         .map_err(|err: DieselError| {
             format!("{}", err)
         })
         .and_then(|candles| {
             match candles.len() as i64 {
-                len if len == RSI_INTERVAL => Ok(candles),
+                len if len == RSI_INTERVAL_CALC_RANGE => Ok(candles),
                 len => Err(format!("Not enough data. Expected {}, got {}", RSI_INTERVAL, len))
             }
         })
         .and_then(|candles| calc_avg_gain_loss(candles))
         .and_then(|GainLoss{ avg_gain, avg_loss, curr_loss, curr_gain }| {
-            let prev_range = range.previous_range().get_prev_period_time_range(RSI_INTERVAL);
-            let TimeRange {
-                start_timestamp: prev_start_timestamp,
-                end_timestamp: prev_end_timestamp,
-                ..} = prev_range;
+            let prev_range = range.previous_range();
 
-            let prev_range_candles = Candle::in_range(
-                conn,
-                range.period(),
-                prev_start_timestamp,
-                prev_end_timestamp
-            );
-
-            prev_range_candles
+            candles_for_rsi_calc(conn, &prev_range)
                 .map_err(|err| {
                     format!("Error get prev range candles: {}", err)
                 })
                 .and_then(|prev_candles| {
                     match prev_candles.len() as i64 {
-                        len if len == RSI_INTERVAL => {
+                        len if len == RSI_INTERVAL_CALC_RANGE => {
                             let prev_gain_loss = calc_avg_gain_loss(prev_candles);
                             match prev_gain_loss {
                                 Ok(GainLoss{ avg_gain: prev_gain, avg_loss: prev_loss, .. }) => {
@@ -82,8 +75,8 @@ pub fn rsi_for_interval<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result
 
 pub fn calc_avg_gain_loss(candles: Vec<Candle>) -> Result<GainLoss, String> {
     match candles.len() as i64 {
-        len if len == RSI_INTERVAL => {
-            let mut diff: [f32; 13] = [0.0f32; 13];
+        len if len == RSI_INTERVAL_CALC_RANGE => {
+            let mut diff: [f32; 14] = [0.0f32; 14];
 
             for inx in 1..(candles.len() - 1) {
                 diff[inx] = candles[inx].close - candles[inx - 1].close;
@@ -104,7 +97,7 @@ pub fn calc_avg_gain_loss(candles: Vec<Candle>) -> Result<GainLoss, String> {
 
             let curr_diff = candles[candles.len() -1].close - candles[candles.len() -2].close;
             let curr_gain = if curr_diff > 0f32 { curr_diff } else { 0f32 };
-            let curr_loss = if curr_diff > 0f32 { 0f32 } else { curr_diff };
+            let curr_loss = if curr_diff > 0f32 { 0f32 } else { curr_diff * -1.0f32 };
 
             Ok(GainLoss {
                 curr_loss: curr_loss,
@@ -113,50 +106,106 @@ pub fn calc_avg_gain_loss(candles: Vec<Candle>) -> Result<GainLoss, String> {
                 avg_loss: avg_loss
             })
         },
-        len => Err(format!("Not enough data. Expected {}, got {}", RSI_INTERVAL, len))
+        len => Err(format!("Not enough data. Expected {}, got {}", RSI_INTERVAL_CALC_RANGE, len))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use test_setup;
-    use std::fs::File;
-    use std::io::prelude::*;
     use models::{Candle};
-    use serde_json;
     use diesel::result::Error as DieselError;
+    use analysis_range::{OneMin, Period, TimeRange, TimePeriod};
+
+    // The fixtures are in this range
+    const ref_range: OneMin = OneMin {
+        start_timestamp: 1538718120i64,
+        end_timestamp: 1538718180i64,
+        period: Period::OneMin,
+        prior_start_timestamp: 1538718060i64,
+    };
+
+    const next_ref_range: OneMin = OneMin {
+        start_timestamp: 1538718180i64,
+        end_timestamp: 1538718240i64,
+        period: Period::OneMin,
+        prior_start_timestamp: 1538718120i64,
+    };
 
     #[test]
-    fn ok() {
-        let con = test_setup::setup().unwrap();
+    fn candles_for_rsi_calc() {
+        let conn = test_setup::setup().unwrap();
+        let file_name = "./test/fixtures/rsi_test.csv".to_string();
+        test_setup::load_candles_from_csv(&conn, &file_name).unwrap();
 
-        let z: Result<Vec<Result<Candle, DieselError>>, String> = File::open("./test/fixtures/rsi_candles.json")
-            .map_err(|err| err.to_string())
-            .map(|mut f| {
-                let mut contents = String::new();
-                f.read_to_string(&mut contents);
-                contents
-            })
-            .and_then(|contents: String| {
-                serde_json::from_str(&contents)
-                    .map(|x: Vec<Candle>| x)
-                    .map_err(|err| err.to_string())
-            })
-            .map(|candles: Vec<Candle>| {
-                candles
-                    .into_iter()
-                    .map(|candle| {
-                        candle.save_as_new(&con)
-                    })
-                    .collect()
-            })
-            .map_err(|err| {
-                println!("Error {}", err);
-                err
-            });
+        let candles_for_rsi  = super::candles_for_rsi_calc(&conn, &ref_range).unwrap();
+        let candles_for_rsi_starts: Vec<i64> = candles_for_rsi.iter().map(|candle| candle.start_time).collect();
 
-        println!("{:?}", z);
+        assert_eq!(candles_for_rsi_starts, vec![
+            1538717280,
+            1538717340,
+            1538717400,
+            1538717460,
+            1538717520,
+            1538717580,
+            1538717640,
+            1538717700,
+            1538717760,
+            1538717820,
+            1538717880,
+            1538717940,
+            1538718000,
+            1538718060,
+            1538718120
+        ]);
+    }
 
-        assert_eq!(3, 4);
+    #[test]
+    fn calc_avg_gain_loss() {
+        let conn = test_setup::setup().unwrap();
+        let file_name = "./test/fixtures/rsi_test.csv".to_string();
+        test_setup::load_candles_from_csv(&conn, &file_name);
+
+        let candles_for_rsi  = super::candles_for_rsi_calc(&conn, &ref_range).unwrap();
+        let gain_loss = super::calc_avg_gain_loss(candles_for_rsi).unwrap();
+        assert_eq!(gain_loss, super::GainLoss {
+            avg_gain: 0.23857144f32,
+            avg_loss: 0.100000106f32,
+            curr_gain: 0f32,
+            curr_loss: 0f32
+        });
+    }
+
+    #[test]
+    fn rsi_for_interval() {
+        let conn = test_setup::setup().unwrap();
+        let file_name = "./test/fixtures/rsi_test.csv".to_string();
+        test_setup::load_candles_from_csv(&conn, &file_name);
+
+        let rsi = super::rsi_for_interval(&conn, &ref_range).unwrap();
+        assert_eq!(rsi, 70.46411);
+    }
+
+    #[test]
+    fn rsi_for_interval_average() {
+        let conn = test_setup::setup().unwrap();
+        let file_name = "./test/fixtures/rsi_test.csv".to_string();
+        test_setup::load_candles_from_csv(&conn, &file_name).unwrap();
+
+        let rsi = super::rsi_for_interval(&conn, &ref_range).unwrap();
+
+        let mut found_candles = Candle::in_range(
+            &conn,
+            Period::OneMin,
+            1538718120i64,
+            1538718180i64
+        ).unwrap();
+        let candle_to_save = found_candles.first_mut().unwrap();
+        candle_to_save.rsi = rsi;
+        candle_to_save.update(&conn);
+
+        let next_rsi = super::rsi_for_interval(&conn, &next_ref_range).unwrap();
+
+        assert_eq!(next_rsi, 66.24962);
     }
 }
