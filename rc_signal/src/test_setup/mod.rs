@@ -1,4 +1,3 @@
-use models::{Candle};
 use diesel::PgConnection;
 use diesel::Connection;
 use diesel::result::Error as DieselError;
@@ -11,6 +10,8 @@ use std::io::Read;
 use std::{thread, time};
 use super::CONFIG_FILE_NAME;
 use models;
+use models::{Candle};
+use models::{Trade, NewTrade};
 use config;
 use csv;
 
@@ -103,6 +104,30 @@ pub fn candles_from_csv(con: &PgConnection, file_name: &str) -> Result<Vec<Candl
                 .deserialize()
                 .map(|x: Result<Candle, _>| x.unwrap())
                 .collect()
+        })
+        .map_err(|err| {
+            println!("Error {}", err);
+            err
+        })
+}
+
+pub fn load_trades_from_csv(con: &PgConnection, file_name: &str) -> Result<Vec<Trade>, String> {
+    std::fs::File::open(file_name)
+        .map_err(|err| err.to_string())
+        .map(|f| {
+            csv::Reader::from_reader(f)
+                .deserialize()
+                .map(|x: Result<NewTrade, _>| x.unwrap())
+                .collect()
+        })
+        .map(|trades: Vec<NewTrade>| {
+            con.transaction::<_, DieselError, _>(|| {
+                Trade::deleteAllRecords(&con);
+                trades
+                    .into_iter()
+                    .map(|trade| trade.save_as_new(&con))
+                    .collect()
+            }).unwrap()
         })
         .map_err(|err| {
             println!("Error {}", err);

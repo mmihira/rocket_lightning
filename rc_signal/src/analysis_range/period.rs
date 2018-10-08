@@ -1,5 +1,6 @@
 use super::one_min;
 use super::{TimePeriod};
+use super::{TimeStamp};
 
 #[derive(PartialEq, Debug, Eq, Clone, Copy)]
 pub enum Period {
@@ -39,6 +40,13 @@ impl Period {
     pub fn analysis_range(self) -> impl TimePeriod {
         match self {
             Period::OneMin => one_min::OneMin::new(),
+            _ => one_min::OneMin::new()
+        }
+    }
+
+    pub fn range_from(self, start_timestamp: TimeStamp) -> impl TimePeriod {
+        match self {
+            Period::OneMin => one_min::OneMin::create_from_start_timestamp(start_timestamp),
             _ => one_min::OneMin::new()
         }
     }

@@ -134,50 +134,96 @@ impl<'a> Engine<'a> {
         let mut open = 0f32;
         let mut close = 0f32;
 
-        for trade in t_in_range.iter() {
-            vol += trade.vol;
-            high = match trade.price > high {
-                true => trade.price,
-                false => high
+        let candle_to_init: Candle = if t_in_range.len() > 0 {
+            for trade in t_in_range.iter() {
+                vol += trade.vol;
+                high = match trade.price > high {
+                    true => trade.price,
+                    false => high
+                };
+                low = match trade.price < low {
+                    true => trade.price,
+                    false => low
+                };
+            }
+
+            // If therer are no trades we should be copying values from the period before
+            // Add a test to replicate this functionality
+            open = match t_in_range.first() {
+                Some(trade) => trade.price,
+                None => 0f32
             };
-            low = match trade.price < low {
-                true => trade.price,
-                false => low
+
+            close = match t_in_range.last() {
+                Some(trade) => trade.price,
+                None => 0f32
             };
-        }
 
-        // If therer are no trades we should be copying values from the period before
-        // Add a test to replicate this functionality
-        open = match t_in_range.first() {
-            Some(trade) => trade.price,
-            None => 0f32
+            Candle {
+                period: range.period() as i32,
+                start_time: range.range_start(),
+                end_time: range.range_end(),
+                open: open,
+                close: close,
+                high: high,
+                low: low,
+                vol: vol,
+                rsi: 0f32,
+                sma_9: 0f32,
+                sma_12: 0f32,
+                sma_26: 0f32,
+                ema_9: 0f32,
+                ema_12: 0f32,
+                ema_26: 0f32
+            }
+        } else {
+            let prev_candle = Candle::prev_candle_of_range(self.conn, range);
+            match prev_candle  {
+                Ok(candle) => {
+                    info!("No trades for period using previous");
+                    Candle {
+                        period: range.period() as i32,
+                        start_time: range.range_start(),
+                        end_time: range.range_end(),
+                        open: candle.close,
+                        close: candle.close,
+                        high: candle.close,
+                        low: candle.close,
+                        vol: 0f32,
+                        rsi: candle.rsi,
+                        sma_9: candle.sma_9,
+                        sma_12: candle.sma_12,
+                        sma_26: candle.sma_26,
+                        ema_9: candle.ema_9,
+                        ema_12: candle.ema_12,
+                        ema_26: candle.ema_26
+                    }
+                },
+                Err(err) => {
+                    info!("No trades for period using default");
+                    Candle {
+                        period: range.period() as i32,
+                        start_time: range.range_start(),
+                        end_time: range.range_end(),
+                        open: open,
+                        close: close,
+                        high: high,
+                        low: low,
+                        vol: vol,
+                        rsi: 0f32,
+                        sma_9: 0f32,
+                        sma_12: 0f32,
+                        sma_26: 0f32,
+                        ema_9: 0f32,
+                        ema_12: 0f32,
+                        ema_26: 0f32
+                    }
+                }
+            }
         };
 
-        close = match t_in_range.last() {
-            Some(trade) => trade.price,
-            None => 0f32
-        };
-
-        let nc = Candle {
-            period: range.period() as i32,
-            start_time: range.range_start(),
-            end_time: range.range_end(),
-            open: open,
-            close: close,
-            high: high,
-            low: low,
-            vol: vol,
-            rsi: 0f32,
-            sma_9: 0f32,
-            sma_12: 0f32,
-            sma_26: 0f32,
-            ema_9: 0f32,
-            ema_12: 0f32,
-            ema_26: 0f32
-        };
-
-        info!("Creating candle with id {:?}", nc.id());
-        nc.save_or_update(self.conn)
+        info!("Creating candle with id {:?}", candle_to_init.id());
+        candle_to_init.save_or_update(self.conn)
     }
 
     fn update_latest_trades(&mut self) -> UpdateTradeResults {
@@ -221,5 +267,80 @@ impl<'a> Engine<'a> {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use test_setup;
+    use models::{Trade, Candle};
+    use diesel::result::Error as DieselError;
+    use analysis_range::{OneMin, Period, TimeRange, TimePeriod};
+
+    // The fixtures are in this range
+    const REF_RANGE: OneMin = OneMin {
+        start_timestamp: 1538718120i64,
+        end_timestamp: 1538718180i64,
+        period: Period::OneMin,
+        prior_start_timestamp: 1538718060i64,
+    };
+
+    const NEXT_REF_RANGE: OneMin = OneMin {
+        start_timestamp: 1538718180i64,
+        end_timestamp: 1538718240i64,
+        period: Period::OneMin,
+        prior_start_timestamp: 1538718120i64,
+    };
+
+    #[test]
+    fn calculate_candle_for_range() {
+        let conn = test_setup::setup().unwrap();
+        let file_name = "./test/fixtures/trades.csv".to_string();
+
+        test_setup::load_trades_from_csv(&conn, &file_name).unwrap();
+        Candle::deleteAllRecords(&conn);
+        let engine = super::Engine::new(&conn);
+        engine.calculate_candle_for_range(&REF_RANGE);
+        let trades = Trade::in_timestamp_range(&conn, 1538718120, 1538718180);
+
+        assert_eq!(trades.len(), 1);
+    }
+
+    #[test]
+    fn calculate_candle_for_range_missing_trades() {
+        let conn = test_setup::setup().unwrap();
+        let file_name = "./test/fixtures/trades_missing_data.csv".to_string();
+
+        test_setup::load_trades_from_csv(&conn, &file_name).unwrap();
+        Candle::deleteAllRecords(&conn);
+        let engine = super::Engine::new(&conn);
+        engine.calculate_candle_for_range(&REF_RANGE);
+        engine.calculate_candle_for_range(&NEXT_REF_RANGE);
+        let trades = Trade::in_timestamp_range(&conn, 1538718180, 1538718240);
+
+        // No trades in the missing duration
+        assert_eq!(trades.len(), 0);
+
+        // Copy values from the previous candle when trades missing
+        let range_candle = Candle::candle_for_range(&conn, &REF_RANGE).unwrap();
+        let next_range_candle = Candle::candle_for_range(&conn, &NEXT_REF_RANGE).unwrap();
+        assert_eq!(
+            (
+                next_range_candle.open,
+                next_range_candle.close,
+                next_range_candle.high,
+                next_range_candle.low,
+                next_range_candle.vol,
+                next_range_candle.rsi
+            ),
+            (
+                range_candle.open,
+                next_range_candle.close,
+                next_range_candle.high,
+                next_range_candle.low,
+                next_range_candle.vol,
+                next_range_candle.rsi
+            )
+        );
     }
 }

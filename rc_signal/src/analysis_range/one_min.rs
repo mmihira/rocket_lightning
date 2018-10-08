@@ -39,6 +39,16 @@ impl OneMin {
         }
     }
 
+    pub fn create_from_start_timestamp(start_timestamp: TimeStamp) -> OneMin {
+        let now_date_time = offset::Utc.timestamp(start_timestamp, 0u32).naive_utc();
+        let now_time = now_date_time.time();
+        let now_date = now_date_time.date();
+        let start_minute = now_time.minute();
+
+        let start_datetime: NaiveDateTime = now_date.and_hms(now_time.hour(), start_minute, 0);
+        OneMin::create_from_start_datetime(start_datetime)
+    }
+
     pub fn prev_range(&self) -> OneMin {
         let start_date = offset::Utc.timestamp(self.prior_start_timestamp, 0u32);
         let prior_start_timestamp = start_date.checked_sub_signed(Duration::seconds(SEC_DURATION)).unwrap();

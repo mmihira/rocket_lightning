@@ -8,7 +8,7 @@ use analysis_range::{ Period, PeriodIdentity, TimePeriod };
 
 #[table_name="candles"]
 #[primary_key(period, start_time, end_time)]
-#[derive(Debug, Deserialize, Queryable, Identifiable, Insertable, AsChangeset)]
+#[derive(Debug, Deserialize, Queryable, Identifiable, Insertable, AsChangeset, PartialEq)]
 pub struct Candle {
     pub period: i32,
     pub start_time: TimeStamp,
@@ -84,8 +84,16 @@ impl Candle{
             .get_results::<Self>(conn)
     }
 
+    pub fn candle_for_range<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<Self, DieselError> {
+        candles_dsl.filter(
+            candles::start_time.eq(range.range_start())
+                .and(candles::end_time.eq(range.range_end()))
+                .and(candles::period.eq(range.period() as i32)))
+            .get_result::<Self>(conn)
+    }
+
     pub fn prev_candle(&self, conn: &PgConnection) -> Result<Self, DieselError> {
-        let range = self.period.period().analysis_range();
+        let range = self.period.period().range_from(self.start_time);
         candles_dsl.filter(
             candles::start_time.eq(range.range_start())
                 .and(candles::end_time.eq(range.range_end()))
@@ -94,10 +102,11 @@ impl Candle{
     }
 
     pub fn prev_candle_of_range<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<Self, DieselError> {
+        let prev_range = range.previous_range();
         candles_dsl.filter(
-            candles::start_time.eq(range.range_start())
-                .and(candles::end_time.eq(range.range_end()))
-                .and(candles::period.eq(range.period() as i32)))
+            candles::start_time.eq(prev_range.range_start())
+                .and(candles::end_time.eq(prev_range.range_end()))
+                .and(candles::period.eq(prev_range.period() as i32)))
             .get_result::<Self>(conn)
     }
 }

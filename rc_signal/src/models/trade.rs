@@ -1,11 +1,12 @@
 use ::schema::trades;
 use diesel::prelude::{PgConnection};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::result::Error as DieselError;
 
 use ::schema::trades::dsl::trades as trades_dsl;
 use timestamp::TimeStamp;
 
-#[derive(Debug, Identifiable,  Queryable)]
+#[derive(Debug, Identifiable, Queryable, Deserialize)]
 pub struct Trade {
     pub id: i32,
     pub tid: i32,
@@ -15,7 +16,7 @@ pub struct Trade {
 }
 
 #[table_name="trades"]
-#[derive(Debug, Insertable)]
+#[derive(Debug, Insertable, Deserialize)]
 pub struct NewTrade {
     pub tid: i32,
     pub timestamp: i64,
@@ -29,6 +30,10 @@ impl Trade {
             .order_by(trades::timestamp.asc())
             .get_results::<Self>(conn)
             .unwrap()
+    }
+
+    pub fn deleteAllRecords(conn: &PgConnection) {
+        ::diesel::delete(trades::table).execute(conn).unwrap();
     }
 }
 
