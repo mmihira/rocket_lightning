@@ -93,9 +93,18 @@ impl<'a> Engine<'a> {
                 candle
             })
             .map(|mut candle| {
-                candle.rsi = rsi::rsi_for_interval(self.conn, range)
+                let rsi_props = rsi::rsi_for_interval(self.conn, range)
                     .map_err(|err| { error!("rsi error: {} .. continuing with default set", err); ()})
-                    .unwrap_or(0f32);
+                    .unwrap_or(rsi::RsiProperties{
+                        rsi: 0f32,
+                        rsi_smoothed: 0f32,
+                        rsi_avg_gain: 0f32,
+                        rsi_avg_loss: 0f32
+                    });
+                candle.rsi = rsi_props.rsi;
+                candle.rsi_avg_gain = rsi_props.rsi_avg_gain;
+                candle.rsi_avg_loss = rsi_props.rsi_avg_loss;
+                candle.rsi_smoothed  = rsi_props.rsi_smoothed;
                 candle
             })
             .and_then(|ref candle| {
@@ -147,8 +156,6 @@ impl<'a> Engine<'a> {
                 };
             }
 
-            // If therer are no trades we should be copying values from the period before
-            // Add a test to replicate this functionality
             open = match t_in_range.first() {
                 Some(trade) => trade.price,
                 None => 0f32
@@ -169,6 +176,9 @@ impl<'a> Engine<'a> {
                 low: low,
                 vol: vol,
                 rsi: 0f32,
+                rsi_smoothed: 0f32,
+                rsi_avg_gain: 0f32,
+                rsi_avg_loss: 0f32,
                 sma_9: 0f32,
                 sma_12: 0f32,
                 sma_26: 0f32,
@@ -191,6 +201,9 @@ impl<'a> Engine<'a> {
                         low: candle.close,
                         vol: 0f32,
                         rsi: candle.rsi,
+                        rsi_smoothed: candle.rsi_smoothed,
+                        rsi_avg_gain: candle.rsi_avg_gain,
+                        rsi_avg_loss: candle.rsi_avg_loss,
                         sma_9: candle.sma_9,
                         sma_12: candle.sma_12,
                         sma_26: candle.sma_26,
@@ -211,6 +224,9 @@ impl<'a> Engine<'a> {
                         low: low,
                         vol: vol,
                         rsi: 0f32,
+                        rsi_smoothed: 0f32,
+                        rsi_avg_gain: 0f32,
+                        rsi_avg_loss: 0f32,
                         sma_9: 0f32,
                         sma_12: 0f32,
                         sma_26: 0f32,

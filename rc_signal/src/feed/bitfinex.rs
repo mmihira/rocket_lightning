@@ -12,7 +12,9 @@ pub struct Public { }
 struct Trade {
     #[serde(rename="type")] pub _type: String,
     pub timestamp: TimeStamp,
-    pub exchange: String,
+    // The exchange was once null for so making it optional
+    // It's not saved in the database anyway
+    pub exchange: Option<String>,
     pub amount: String,
     pub price: String,
     pub tid: i32
@@ -69,4 +71,3 @@ impl PollTrades for Public {
             })
     }
 }
-

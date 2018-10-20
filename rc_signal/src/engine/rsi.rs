@@ -14,6 +14,14 @@ pub struct GainLoss {
     curr_loss: f32
 }
 
+#[derive(Debug, PartialEq)]
+pub struct RsiProperties {
+    pub rsi: f32,
+    pub rsi_smoothed: f32,
+    pub rsi_avg_gain: f32,
+    pub rsi_avg_loss: f32
+}
+
 pub fn candles_for_rsi_calc<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<Vec<Candle>, DieselError> {
     let period_range = range.get_prev_period_time_range(RSI_INTERVAL + 1i64);
     let TimeRange { start_timestamp, end_timestamp, ..} = period_range;
@@ -26,7 +34,11 @@ pub fn candles_for_rsi_calc<T: TimePeriod>(conn: &PgConnection, range: &T) -> Re
     )
 }
 
-pub fn rsi_for_interval<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<f32, String> {
+fn rsi_calc(avg_gain: f32, avg_loss: f32) -> f32 {
+    100f32 - (100f32 / (1f32 + (avg_gain/avg_loss)))
+}
+
+pub fn rsi_for_interval<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result<RsiProperties, String> {
     candles_for_rsi_calc(conn, range)
         .map_err(|err: DieselError| {
             format!("{}", err)
@@ -39,37 +51,25 @@ pub fn rsi_for_interval<T: TimePeriod>(conn: &PgConnection, range: &T) -> Result
         })
         .and_then(|candles| calc_avg_gain_loss(candles))
         .and_then(|GainLoss{ avg_gain, avg_loss, curr_loss, curr_gain }| {
-            let prev_range = range.previous_range();
+            let mut rsi_props = RsiProperties {
+                rsi: rsi_calc(avg_gain, avg_loss),
+                rsi_smoothed: rsi_calc(avg_gain, avg_loss),
+                rsi_avg_gain: avg_gain,
+                rsi_avg_loss: avg_loss
+            };
 
-            candles_for_rsi_calc(conn, &prev_range)
-                .map_err(|err| {
-                    format!("Error get prev range candles: {}", err)
-                })
-                .and_then(|prev_candles| {
-                    match prev_candles.len() as i64 {
-                        len if len == RSI_INTERVAL_CALC_RANGE => {
-                            let prev_gain_loss = calc_avg_gain_loss(prev_candles);
-                            match prev_gain_loss {
-                                Ok(GainLoss{ avg_gain: prev_gain, avg_loss: prev_loss, .. }) => {
-                                    let relative_strength = (prev_gain * 13f32 + curr_gain) / (prev_loss * 13f32 + curr_loss);
-                                    Ok(relative_strength)
-                                },
-                                Err(err) => {
-                                    info!("Not enough in RSI prev range. Treating as start");
-                                    Ok(avg_gain / avg_loss)
-                                }
-                            }
-                        },
-                        len => {
-                            info!("Not enough in RSI prev range. Treating as start");
-                            Ok(avg_gain / avg_loss)
-                        }
+            let prev_candle = Candle::prev_candle_of_range(conn, range);
+            match prev_candle {
+                Ok(candle) => {
+                    if (candle.rsi_avg_loss > 0f32) {
+                        rsi_props.rsi_avg_gain = (candle.rsi_avg_gain * 13f32 + curr_gain) / (RSI_INTERVAL as f32);
+                        rsi_props.rsi_avg_loss = (candle.rsi_avg_loss * 13f32 + curr_loss) / (RSI_INTERVAL as f32);
+                        rsi_props.rsi_smoothed = rsi_calc(rsi_props.rsi_avg_gain, rsi_props.rsi_avg_loss);
                     }
-                })
-                .and_then(|relative_strength| {
-                    let rsi = (100f32) - (100f32 / (1f32 + relative_strength));
-                    Ok(rsi)
-                })
+                },
+                Err(er) => {}
+            }
+            Ok(rsi_props)
         })
 }
 
@@ -78,8 +78,8 @@ pub fn calc_avg_gain_loss(candles: Vec<Candle>) -> Result<GainLoss, String> {
         len if len == RSI_INTERVAL_CALC_RANGE => {
             let mut diff: [f32; 14] = [0.0f32; 14];
 
-            for inx in 1..(candles.len() - 1) {
-                diff[inx] = candles[inx].close - candles[inx - 1].close;
+            for inx in 1..(candles.len()) {
+                diff[inx - 1] = candles[inx].close - candles[inx - 1].close;
             }
 
             let mut avg_gain: f32 = diff
@@ -183,7 +183,12 @@ mod tests {
         test_setup::load_candles_from_csv(&conn, &file_name);
 
         let rsi = super::rsi_for_interval(&conn, &ref_range).unwrap();
-        assert_eq!(rsi, 70.46411);
+        assert_eq!(rsi, super::RsiProperties{
+            rsi: 70.46411f32,
+            rsi_smoothed: 70.46411f32,
+            rsi_avg_gain: 0.23857144f32,
+            rsi_avg_loss: 0.100000106f32
+        });
     }
 
     #[test]
@@ -192,7 +197,7 @@ mod tests {
         let file_name = "./test/fixtures/rsi_test.csv".to_string();
         test_setup::load_candles_from_csv(&conn, &file_name).unwrap();
 
-        let rsi = super::rsi_for_interval(&conn, &ref_range).unwrap();
+        let rsi_props = super::rsi_for_interval(&conn, &ref_range).unwrap();
 
         let mut found_candles = Candle::in_range(
             &conn,
@@ -201,11 +206,19 @@ mod tests {
             1538718180i64
         ).unwrap();
         let candle_to_save = found_candles.first_mut().unwrap();
-        candle_to_save.rsi = rsi;
+        candle_to_save.rsi = rsi_props.rsi;
+        candle_to_save.rsi_avg_gain = rsi_props.rsi_avg_gain;
+        candle_to_save.rsi_avg_loss = rsi_props.rsi_avg_loss;
+        candle_to_save.rsi_smoothed  = rsi_props.rsi_smoothed;
         candle_to_save.update(&conn);
 
         let next_rsi = super::rsi_for_interval(&conn, &next_ref_range).unwrap();
 
-        assert_eq!(next_rsi, 66.24962);
+        assert_eq!(next_rsi, super::RsiProperties{
+            rsi: 70.020966f32,
+            rsi_smoothed: 66.24962f32,
+            rsi_avg_gain: 0.22153063f32,
+            rsi_avg_loss: 0.112857156f32
+        });
     }
 }

@@ -1,8 +1,26 @@
-[tasks.reset_test]
+[tasks.database_reset_test]
 env = { "DATABASE_URL" = "postgres://postgres:exampl@localhost:5432/rocket_rc_test" }
 script = [
 '''
 	cd ./rc_signal/
 	diesel database reset
+'''
+]
+
+[tasks.database_reset_prod]
+env = { "DATABASE_URL" = "postgres://postgres:exampl@localhost:5432/rocket_rc" }
+script = [
+'''
+	cd ./rc_signal/
+	diesel database reset
+'''
+]
+
+[tasks.test_rc_signal]
+env = { "DATABASE_URL" = "postgres://postgres:exampl@localhost:5432/rocket_rc_test" }
+script = [
+'''
+	cd ./rc_signal/
+	cargo test -- --test-threads=1
 '''
 ]
