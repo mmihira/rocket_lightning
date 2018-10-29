@@ -1,9 +1,9 @@
-use ::schema::trades;
+use rc_schema::schema::trades;
 use diesel::prelude::{PgConnection};
 use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
 use diesel::result::Error as DieselError;
 
-use ::schema::trades::dsl::trades as trades_dsl;
+use rc_schema::schema::trades::dsl::trades as trades_dsl;
 use timestamp::TimeStamp;
 
 #[derive(Debug, Identifiable, Queryable, Deserialize)]

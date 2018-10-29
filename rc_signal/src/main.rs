@@ -15,7 +15,7 @@ use self::diesel::prelude::*;
 use std_config::{File, FileFormat, Config};
 use std::{thread, time};
 
-pub mod schema;
+extern crate rc_schema;
 pub mod models;
 pub mod config;
 pub mod timestamp;

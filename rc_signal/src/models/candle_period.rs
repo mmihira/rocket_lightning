@@ -1,4 +1,4 @@
-use ::schema::candle_period;
+use rc_schema::schema::candle_period;
 // use ::schema::candle_period::dsl::candle_period as candle_period_dsl;
 use diesel::prelude::{PgConnection};
 use diesel::{ExpressionMethods, RunQueryDsl};

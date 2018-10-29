@@ -34,7 +34,7 @@ pub fn connect_postgres(config: &config::Config) -> PgConnection {
 }
 
 pub fn setup() -> Result<PgConnection, String> {
-    use schema::trades::dsl::*;
+    use rc_schema::schema::trades::dsl::*;
 
     let config_result = get_config();
     match config_result {

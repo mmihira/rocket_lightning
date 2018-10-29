@@ -1,4 +1,9 @@
+
+
+Calculates Price Action Data based on
+
 Install cargo-make
+
 
 cd ./docker/
 docker-compose up

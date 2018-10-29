@@ -1,6 +1,6 @@
 use timestamp::{TimeStamp};
-use ::schema::candles;
-use ::schema::candles::dsl::candles as candles_dsl;
+use rc_schema::schema::candles;
+use rc_schema::schema::candles::dsl::candles as candles_dsl;
 use diesel::prelude::{PgConnection};
 use diesel::{Identifiable, ExpressionMethods, QueryDsl, RunQueryDsl, BoolExpressionMethods};
 use diesel::result::Error as DieselError;
