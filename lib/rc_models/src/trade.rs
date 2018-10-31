@@ -44,5 +44,3 @@ impl NewTrade {
             .get_result(conn)
     }
 }
-
-

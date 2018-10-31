@@ -3,9 +3,10 @@ name = "rc_models"
 version = "1.0.0"
 
 [dependencies]
-diesel = { version = "1.3.2", features = ["postgres"] }
 serde = "*"
 serde_derive = "*"
 serde_json = "*"
+diesel = { version = "1.3.2", features = ["postgres"] }
 rc_schema = { path= "./../rc_schema" }
-
+timestamp = { path= "./../timestamp" }
+analysis_range = { path = "./../analysis_range" }

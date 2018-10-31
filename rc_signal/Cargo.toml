@@ -16,5 +16,6 @@ serde = "*"
 serde_derive = "*"
 serde_json = "*"
 rc_schema = { path= "./../lib/rc_schema/" }
-
-
+timestamp = { path= "./../lib/timestamp/" }
+analysis_range = { path= "./../lib/analysis_range/" }
+rc_models = { path= "./../lib/rc_models" }

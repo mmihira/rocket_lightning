@@ -35,4 +35,3 @@ impl CandlePeriod {
         self.id.period()
     }
 }
-

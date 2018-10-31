@@ -15,13 +15,13 @@ use self::diesel::prelude::*;
 use std_config::{File, FileFormat, Config};
 use std::{thread, time};
 
+extern crate analysis_range;
 extern crate rc_schema;
-pub mod models;
+extern crate timestamp;
+extern crate rc_models as models;
 pub mod config;
-pub mod timestamp;
 pub mod feed;
 pub mod engine;
-pub mod analysis_range;
 pub mod test_setup;
 
 const CONFIG_FILE_NAME: &str = "config";

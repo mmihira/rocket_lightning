@@ -1,8 +1,9 @@
+extern crate chrono;
+extern crate timestamp;
 pub mod one_min;
 pub mod five_min;
 pub mod period;
 use timestamp::{ TimeStamp };
-use std;
 
 pub use self::one_min::OneMin;
 pub use self::period::{Period, PeriodIdentity};

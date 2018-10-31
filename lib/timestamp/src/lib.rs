@@ -1,3 +1,4 @@
+extern crate chrono;
 use chrono::{NaiveDateTime};
 
 pub type TimeStamp = i64;

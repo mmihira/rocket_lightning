@@ -30,7 +30,7 @@ pub struct Candle {
     pub ema_26: f32
 }
 
-impl Candle{
+impl Candle {
     pub fn sma_for_interval(&self, interval: i64) -> f32 {
         match interval {
             9 => self.sma_9,
