@@ -30,6 +30,27 @@ pub struct Candle {
     pub ema_26: f32
 }
 
+graphql_object!(Candle: () |&self| {
+    field period() -> i32 { self.period }
+    field start_time() -> String { self.start_time.to_string() }
+    field end_time() -> String { self.end_time.to_string() }
+    field open() -> String { self.open.to_string() }
+    field close() -> String { self.close.to_string() }
+    field high() -> String { self.high.to_string() }
+    field low() -> String { self.low.to_string() }
+    field vol() -> String { self.vol.to_string() }
+    field rsi_avg_gain() -> String { self.rsi_avg_gain.to_string() }
+    field rsi_avg_loss() -> String { self.rsi_avg_loss.to_string() }
+    field rsi() -> String { self.rsi.to_string() }
+    field rsi_smoothed() -> String { self.rsi_smoothed.to_string() }
+    field sma_9() -> String { self.sma_9.to_string() }
+    field sma_12() -> String { self.sma_12.to_string() }
+    field sma_26() -> String { self.sma_26.to_string() }
+    field ema_9() -> String { self.ema_9.to_string() }
+    field ema_12() -> String { self.ema_12.to_string() }
+    field ema_26() -> String { self.ema_26.to_string() }
+});
+
 impl Candle {
     pub fn sma_for_interval(&self, interval: i64) -> f32 {
         match interval {

@@ -1,3 +1,8 @@
+#![allow(proc_macro_derive_resolution_fallback)]
+
+#[macro_use] extern crate juniper;
+#[macro_use] extern crate juniper_codegen;
+
 extern crate serde;
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate diesel;
