@@ -24,3 +24,47 @@ script = [
 	cargo test -- --test-threads=1
 '''
 ]
+
+[tasks.start_dev_pg]
+script = [
+'''
+	cd ./docker/dev
+	docker-compose up -d
+'''
+]
+
+[tasks.docker_build_rc_signal]
+env = { "MODE" = "NEW" }
+script = [
+'''
+	cd ./rc_signal
+	context_dir="/tmp/rocket_rc/rc_signal"
+	rc_context="$context_dir"/ctx
+	[ -e "$context_dir"  ] && rm -rf "$context_dir"
+	mkdir -p "$rc_context"
+	cp -r ./* "$rc_context"
+	cp -r ../lib "$context_dir"
+	cp ../docker/rc_signal/Dockerfile "$context_dir"
+	cp ../docker/rc_signal/deps.sh "$context_dir"
+	cp ../docker/rc_signal/entrypoint.sh "$context_dir"
+	cd "$context_dir"
+	ls -lath
+	[ -e ./ctx/target ] && rm -rf ./ctx/target
+	docker build  \
+		-t rc_signal \
+		--build-arg  p_dir=ctx \
+		--build-arg  mode=${MODE} \
+		./
+'''
+]
+
+[tasks.run_rc_signal_docker]
+script = [
+'''
+	docker run \
+		--restart always \
+  	--log-driver syslog \
+		-d \
+		rc_signal
+'''
+]

@@ -1,11 +1,7 @@
-
 # Rocket RC
+RSI Calculation. Full stack including calculation service, server, and UI App.
 
-RSI Calculation
-Made 
-
-We use : 
-
+We use :
 - Rocket (https://rocket.rs/)
 - Postgres Adapter Diesel (https://diesel.rs/)
 - Graphql - Juniper (https://github.com/graphql-rust/juniper)
@@ -13,42 +9,49 @@ We use :
 ## Table of Contents
 
 * [Requiremets](#install)
-* [Install](#install)
 * [Usage](#usage)
-* [Configuration](#config)
 * [Test](#test)
 * [Changelog](#changelog)
 
 ## Requirements
 
-* cargo-make
-* cargo
-* rust
+You will need rust. Install if for your system at : ```` https://www.rust-lang.org/en-US/install.html ````
 
-## Install
-
-cd ./docker/
-docker-compose up
-cd ../rc_signal
-diesel setup
+You will need the diesel-cli and cargo make
+````
+  cargo install diesel_cli --no-default-features --features postgres
+  cargo install --force cargo-make
+````
 
 ## Usage
 
+Instructions are given for running locally as a docker environment
+First find your host IP given by your router.
+Make sure to set the ip address in rc_signal/config.json
 
+First start up postgres docker  ```` cargo make start_dev_pg ````
+Run the migrations for prod     ```` cargo make database_reset_prod ````
+Run the migrations for test     ```` cargo make database_reset_test ````
+Build rc_signal                 ```` cargo make docker_build_rc_signal ````
+Build the server
+Build the app
 
-#### Run dev environment
+Start the server, rc_signal, and app
+```` cargo run rc_signal ````
 
-Run the docker dev environment in ````./docker/dev/docker-compose.yml````<br>
+### Build Locally
 
-#### Build production and run production server
-
+For development it's also possible to run ```` cargo  buil ```` inside the
+```` /rc_singnal ```` or  ```` /server ```` to build those modules and
+run them locally.
 
 ## Configuration
 
 ## Test
 
-Don't run tests in parallel ! Anything involving the database. DOn't run tests in parallel.
-cargo test -- --test-threads=1
+Don't run tests in parallel ! Anything involving the database. Don't run tests inparallel.
+
+```` cargo test -- --test-threads=1 ````
 
 ## Changelog
 
