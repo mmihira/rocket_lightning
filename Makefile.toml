@@ -58,6 +58,30 @@ script = [
 '''
 ]
 
+[tasks.docker_build_rc_server]
+env = { "MODE" = "NEW" }
+script = [
+'''
+	cd ./server
+	context_dir="/tmp/rocket_rc/server"
+	rc_context="$context_dir"/ctx
+	[ -e "$context_dir"  ] && rm -rf "$context_dir"
+	mkdir -p "$rc_context"
+	cp -r ./* "$rc_context"
+	cp -r ../lib "$context_dir"
+	cp ../docker/server/Dockerfile "$context_dir"
+	cp ../docker/server/entrypoint.sh "$context_dir"
+	cd "$context_dir"
+	ls -lath
+	[ -e ./ctx/target ] && rm -rf ./ctx/target
+	docker build  \
+		-t rc_server \
+		--build-arg  p_dir=ctx \
+		--build-arg  mode=${MODE} \
+		./
+'''
+]
+
 [tasks.run_rc_signal_docker]
 script = [
 '''
@@ -66,5 +90,19 @@ script = [
   	--log-driver syslog \
 		-d \
 		rc_signal
+'''
+]
+
+[tasks.run_rc_server]
+script = [
+'''
+	docker run \
+		--restart always \
+  	--log-driver syslog \
+		-e RC_POSTGRES_HOST=postgres \
+		--network=dev_rocket_net \
+		-p 8000:8000 \
+		-d \
+		rc_server
 '''
 ]

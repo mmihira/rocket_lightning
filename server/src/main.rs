@@ -19,7 +19,7 @@ mod routes;
 pub mod config;
 mod graphql_schema;
 
-use std_config::{File, FileFormat, Config};
+use std_config::{File, FileFormat, Config, Environment};
 use diesel::r2d2::ConnectionManager;
 use diesel::pg::PgConnection;
 use juniper::{ EmptyMutation};
@@ -29,7 +29,8 @@ const CONFIG_FILE_NAME: &str = "config";
 fn get_config() -> Result<config::Config, std_config::ConfigError> {
     let mut default_config = Config::default();
     default_config
-        .merge(File::new(CONFIG_FILE_NAME, FileFormat::Json))
+        .merge(File::new(CONFIG_FILE_NAME, FileFormat::Json))?
+        .merge(Environment::with_prefix("rc"))
         .and_then(|merged| merged.clone().try_into::<config::Config>())
 }
 
