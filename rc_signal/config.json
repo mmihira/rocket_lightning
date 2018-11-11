@@ -4,7 +4,7 @@
     "password": "exampl",
     "database": "rocket_rc",
     "port": 5432,
-    "host": "10.13.182.218",
+    "host": "localhost",
     "no_attempt_reconnect_startup": 10
   },
   "postgres_test": {

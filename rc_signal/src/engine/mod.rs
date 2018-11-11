@@ -48,6 +48,8 @@ impl<'a> Engine<'a> {
         }
 
         self.do_range(Period::OneMin);
+        self.do_range(Period::FifteenMin);
+        self.do_range(Period::ThirtyMin);
     }
 
     fn do_range(&self, period: Period) {
@@ -291,17 +293,17 @@ mod tests {
     use test_setup;
     use models::{Trade, Candle};
     use diesel::result::Error as DieselError;
-    use analysis_range::{OneMin, Period, TimeRange, TimePeriod};
+    use analysis_range::{Range, Period, TimeRange, TimePeriod};
 
     // The fixtures are in this range
-    const REF_RANGE: OneMin = OneMin {
+    const REF_RANGE: Range =  Range{
         start_timestamp: 1538718120i64,
         end_timestamp: 1538718180i64,
         period: Period::OneMin,
         prior_start_timestamp: 1538718060i64,
     };
 
-    const NEXT_REF_RANGE: OneMin = OneMin {
+    const NEXT_REF_RANGE: Range = Range {
         start_timestamp: 1538718180i64,
         end_timestamp: 1538718240i64,
         period: Period::OneMin,

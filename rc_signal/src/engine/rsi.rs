@@ -115,17 +115,17 @@ mod tests {
     use test_setup;
     use models::{Candle};
     use diesel::result::Error as DieselError;
-    use analysis_range::{OneMin, Period, TimeRange, TimePeriod};
+    use analysis_range::{Range, Period, TimeRange, TimePeriod};
 
     // The fixtures are in this range
-    const ref_range: OneMin = OneMin {
+    const ref_range: Range = Range {
         start_timestamp: 1538718120i64,
         end_timestamp: 1538718180i64,
         period: Period::OneMin,
         prior_start_timestamp: 1538718060i64,
     };
 
-    const next_ref_range: OneMin = OneMin {
+    const next_ref_range: Range = Range {
         start_timestamp: 1538718180i64,
         end_timestamp: 1538718240i64,
         period: Period::OneMin,

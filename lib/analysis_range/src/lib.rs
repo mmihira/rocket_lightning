@@ -1,12 +1,18 @@
 extern crate chrono;
 extern crate timestamp;
-pub mod one_min;
-pub mod five_min;
 pub mod period;
+pub mod range;
 use timestamp::{ TimeStamp };
 
-pub use self::one_min::OneMin;
-pub use self::period::{Period, PeriodIdentity};
+
+/**
+ * Period: A time period such as an hour, or day, or fifteen minutes
+ * Range: A general object which has the details for some time period
+ *
+ */
+
+pub use self::period::{Period, PeriodIdentity, PeriodDuration};
+pub use range::{Range};
 
 #[derive(Debug)]
 pub struct TimeRange<T: TimePeriod> {
@@ -25,4 +31,5 @@ pub trait TimePeriod: std::marker::Sized + std::fmt::Debug {
     fn get_prev_period_range(&self, no: i64) -> Vec<Self>;
     fn debug(&self) -> String;
     fn get_prev_period_time_range(&self, no: i64) -> TimeRange<Self>;
+    fn create_from_start_timestamp(period: Period, start_timestamp: TimeStamp) -> Self;
 }
