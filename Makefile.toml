@@ -25,11 +25,11 @@ script = [
 '''
 ]
 
-[tasks.start_dev_pg]
+[tasks.docker_reset_db]
 script = [
 '''
-	cd ./docker/dev
-	docker-compose up -d
+	docker-compose -f ./docker/dev/docker-compose.yml down -v
+	docker-compose -f ./docker/dev/docker-compose.yml up -d
 '''
 ]
 
@@ -88,12 +88,14 @@ script = [
 	docker run \
 		--restart always \
   	--log-driver syslog \
+		-e RC_POSTGRES_HOST=postgres \
+		--network=dev_rocket_net \
 		-d \
 		rc_signal
 '''
 ]
 
-[tasks.run_rc_server]
+[tasks.run_rc_server_docker]
 script = [
 '''
 	docker run \

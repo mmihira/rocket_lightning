@@ -26,24 +26,20 @@ You will need the diesel-cli and cargo make
 ## Usage
 
 Instructions are given for running locally as a docker environment
-First find your host IP given by your router.
-Make sure to set the ip address in rc_signal/config.json
 
-First start up postgres docker  ` cargo make start_dev_pg ` <br>
+Build rc_signal                 ` cargo make docker_build_rc_signal ` <br>
+Build the server                ` cargo make docker_build_rc_server ` <br>
+
+Start up postgres docker        ` cargo make docker_reset_db ` <br>
 Run the migrations for prod     ` cargo make database_reset_prod ` <br>
 Run the migrations for test     ` cargo make database_reset_test ` <br>
-Build rc_signal                 ` cargo make docker_build_rc_signal ` <br>
-Build the server
-Build the app
-
-
-Start the server, rc_signal, and app
-```` cargo run rc_signal ````
+Run rc_signal                   ` cargo make run_rc_signal_docker ` <br>
+Run rc_server                   ` cargo make run_rc_server_docker ` <br>
 
 ### Build Locally
 
-For development it's also possible to run ```` cargo  buil ```` inside the
-```` /rc_singnal ```` or  ```` /server ```` to build those modules and
+For development it's also possible to run ```` cargo  build ```` inside the
+```` /rc_signal ```` or  ```` /server ```` to build those modules and
 run them locally.
 
 ## Configuration
