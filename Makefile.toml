@@ -16,6 +16,19 @@ script = [
 '''
 ]
 
+[tasks.docker_database_reset_prod]
+env = { "DATABASE_URL" = "postgres://postgres:exampl@postgres:5432/rocket_rc" }
+script = [
+'''
+	docker run \
+		-e DATABASE_URL="$DATABASE_URL" \
+		--network=dev_rocket_net \
+		diesel_cli \
+		diesel database reset
+'''
+]
+
+
 [tasks.test_rc_signal]
 env = { "DATABASE_URL" = "postgres://postgres:exampl@localhost:5432/rocket_rc_test" }
 script = [
@@ -33,8 +46,34 @@ script = [
 '''
 ]
 
+[tasks.docker_build_diesel_cli]
+script = [
+'''
+	context_dir="/tmp/rocket_rc/diesel_cli"
+	rc_context="$context_dir"
+	[ -e "$context_dir"  ] && rm -rf "$context_dir"
+	mkdir -p "$rc_context"
+	cp ./docker/diesel_cli/Dockerfile "$rc_context"
+	cp -r ./rc_signal/migrations "$rc_context"
+	cd "$context_dir"
+	docker build  \
+		-t diesel_cli \
+		./
+'''
+]
+
+[tasks.save_docker_build_diesel_cli]
+script = [
+'''
+	[ -e /tmp/diesel_cli_tar ] && rm -rf /tmp/diesel_cli_tar
+	mkdir -p /tmp/diesel_cli_tar
+	docker save diesel_cli -o /tmp/diesel_cli_tar/diesel_cli.c.tar
+	cd /tmp/diesel_cli_tar
+	tar -zvcf diesel_cli.tar ./diesel_cli.c.tar
+'''
+]
+
 [tasks.docker_build_rc_signal]
-env = { "MODE" = "NEW" }
 script = [
 '''
 	cd ./rc_signal
@@ -53,8 +92,19 @@ script = [
 	docker build  \
 		-t rc_signal \
 		--build-arg  p_dir=ctx \
-		--build-arg  mode=${MODE} \
 		./
+'''
+]
+
+[tasks.save_docker_build_rc_signal]
+dependencies = ["docker_build_rc_signal"]
+script = [
+'''
+	[ -e /tmp/rc_signal_tar  ] && rm -rf /tmp/rc_signal_tar
+	mkdir -p /tmp/rc_signal_tar
+	docker save rc_signal -o /tmp/rc_signal_tar/rc_signal.c.tar
+	cd /tmp/rc_signal_tar
+	tar -zvcf rc_signal.tar ./rc_signal.c.tar
 '''
 ]
 

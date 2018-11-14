@@ -9,6 +9,8 @@ extern crate config as std_config;
 #[macro_use] extern crate diesel;
 extern crate dotenv;
 extern crate csv;
+// Docker alpine build req
+extern crate openssl;
 
 use self::diesel::prelude::*;
 

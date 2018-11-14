@@ -10,9 +10,12 @@
       "attach_volume": false,
       "ansible_host_groups": [
         "docker",
+        "global_env",
+        "postgres",
         "rc_signal"
       ],
       "env_injection": [
+        "INST_NAME=rocket_rc"
       ]
     }
   }

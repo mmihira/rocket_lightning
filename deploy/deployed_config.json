@@ -4,14 +4,18 @@
       "ami": "ami-96666ff5", 
       "ansible_host_groups": [
         "docker", 
+        "global_env", 
+        "postgres", 
         "rc_signal"
       ], 
       "attach_volume": false, 
-      "env_injection": [], 
-      "ip_address": "13.210.66.60", 
-      "private_dns_name": "ip-172-31-28-81.ap-southeast-2.compute.internal", 
-      "private_ip_address": "172.31.28.81", 
-      "public_dns_name": "ec2-13-210-66-60.ap-southeast-2.compute.amazonaws.com", 
+      "env_injection": [
+        "INST_NAME=rocket_rc"
+      ], 
+      "ip_address": "13.238.154.172", 
+      "private_dns_name": "ip-172-31-26-189.ap-southeast-2.compute.internal", 
+      "private_ip_address": "172.31.26.189", 
+      "public_dns_name": "ec2-13-238-154-172.ap-southeast-2.compute.amazonaws.com", 
       "security_groups": [
         "ssh2"
       ], 

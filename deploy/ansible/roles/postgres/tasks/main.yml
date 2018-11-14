@@ -1,0 +1,80 @@
+---
+- name: Make data dir
+  become: true
+  become_user: root
+  shell: mkdir -p /pg_data
+
+- name: Copy archives
+  become: true
+  become_user: root
+  copy:
+    src: /tmp/rocket_rc_deploy/pg.gzip
+    dest: /usr
+    force: yes
+
+- name: Copy diesel_cli image
+  become: true
+  become_user: root
+  copy:
+    src: /tmp/diesel_cli_tar/diesel_cli.tar
+    dest: /usr
+    force: yes
+
+- name: Unarchive
+  become: true
+  become_user: root
+  shell: tar -Pzxvf /usr/diesel_cli.tar -C /usr
+
+- name: Docker build diesel_cli
+  become: true
+  become_user: root
+  shell: "docker load < /usr/diesel_cli.c.tar"
+
+- name: Add postgres-client
+  package:
+    name: postgresql-client
+    state: present
+    update_cache: yes
+
+- name: Unarchive
+  become: true
+  become_user: root
+  shell: mkdir -p /usr/rocket_pg; tar -Pzxvf /usr/pg.gzip -C /usr/rocket_pg
+
+- name: Stop
+  become: true
+  become_user: root
+  shell: "docker stop rocket_rc_pg"
+  ignore_errors: yes
+
+- name: Remove
+  become: true
+  become_user: root
+  shell: "docker rm rocket_rc_pg"
+  ignore_errors: yes
+
+- name: Docker cleanup system
+  become: true
+  become_user: root
+  shell: "docker system prune -f"
+  ignore_errors: yes
+
+- name: Docker build
+  become: true
+  become_user: root
+  shell: "cd /usr/rocket_pg/postgres; docker build -t rocket_rc_pg --no-cache ./"
+
+- name: Copy run script
+  become: true
+  become_user: root
+  copy:
+    src: scripts/run.sh
+    mode: 0700
+    dest: /tmp
+    force: yes
+
+- name: run
+  become: true
+  become_user: root
+  shell: "export POSTGRES_PASSWORD='{{pg_pw}}'; /tmp/run.sh"
+

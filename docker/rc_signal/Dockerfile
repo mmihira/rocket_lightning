@@ -1,18 +1,15 @@
-FROM rust:1.26 as build
-
+FROM ekidd/rust-musl-builder AS builder
 ARG p_dir
 
 # create a new empty shell project
-RUN USER=root cargo new --bin rc_signal/ctx
-WORKDIR /rc_signal/ctx
-
+RUN USER=root cargo new --bin /home/rust/rc_signal/ctx
+WORKDIR /home/rust/rc_signal/ctx
 # copy over your manifests
 COPY ./${p_dir}/Cargo.lock ./Cargo.lock
 COPY ./${p_dir}/Cargo.toml ./Cargo.toml
 COPY ./${p_dir}/rust-toolchain ./
-WORKDIR /rc_signal
-COPY ./lib ./lib
-WORKDIR /rc_signal/ctx
+COPY ./lib ./../lib
+RUN sudo chown -R rust:rust /home/rust/rc_signal
 
 # cache dependencies
 RUN cargo build --release
@@ -29,20 +26,15 @@ COPY ./entrypoint.sh ./
 RUN cargo build --release
 
 # Final image
-FROM postgres:9.6.10
-ENV TZ=Australia/Melbourne
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
- && echo $TZ > /etc/timezone \
- && dpkg-reconfigure -f noninteractive tzdata
+FROM alpine:3.8
+RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add libpq
+RUN apk --no-cache add curl
 
-COPY --from=build /rc_signal/ctx/target/release/rc_signal .
-COPY --from=build /rc_signal/ctx/config.json .
-COPY --from=build /rc_signal/ctx/diesel.toml .
-COPY --from=build /rc_signal/ctx/migrations .
-COPY --from=build /rc_signal/ctx/entrypoint.sh .
-
-COPY deps.sh /deps.sh
-RUN /deps.sh
+COPY --from=builder /home/rust/rc_signal/ctx/target/x86_64-unknown-linux-musl/release/rc_signal .
+COPY --from=builder /home/rust/rc_signal/ctx/config.json .
+COPY --from=builder /home/rust/rc_signal/ctx/diesel.toml .
+COPY --from=builder /home/rust/rc_signal/ctx/entrypoint.sh .
 
 # set the startup command to run your binary
-CMD ["./entrypoint.sh"]
+CMD "./entrypoint.sh"

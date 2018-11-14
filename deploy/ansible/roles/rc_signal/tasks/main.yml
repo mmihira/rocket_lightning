@@ -1,51 +1,56 @@
 ---
-- name: rocket_rc user
-  user:
-    name: rocket_rc
-    shell: /bin/bash
-    comment: "rocket_rc"
-    system: 'yes'
+- name: remove
+  become: true
+  become_user: root
+  shell: rm -rf /usr/rc_signal || mkdir -p /usr/rc_signal/
+
+- name: make
+  become: true
+  become_user: root
+  shell: mkdir -p /usr/rc_signal/
 
 - name: Copy archives
   become: true
-  become_user: rocket_rc
+  become_user: root
   copy:
-    src: /tmp/docker_rocket_rc/rc_signal.gzip
-    dest: /home/rocket_rc
+    src: /tmp/rc_signal_tar/rc_signal.tar
+    dest: /usr/rc_signal/rc_signal.tar
     force: yes
 
 - name: Unarchive
   become: true
-  become_user: rocket_rc
-  shell: tar -Pzxvf /home/rocket_rc/rc_signal.gzip -C /home/rocket_rc
-
-- name: Copy over env file
-  template:
-    src: ./templates/env.env
-    dest: /home/rocket_rc/
-    owner: rocket_rc
-    group: rocket_rc
-    mode: 0400
+  become_user: root
+  shell: tar -Pzxvf /usr/rc_signal/rc_signal.tar -C /usr/rc_signal/
 
 - name: Stop
   become: true
   become_user: root
-  shell: "docker stop rocket_rc_docker"
+  shell: "docker stop rc_signal"
   ignore_errors: yes
 
 - name: Remove
   become: true
   become_user: root
-  shell: "docker rm rocket_rc_docker"
+  shell: "docker rm rc_signal"
   ignore_errors: yes
 
 - name: Docker build
   become: true
   become_user: root
-  shell: "cd /home/rocket_rc; docker build -t rc_signal ./"
+  shell: "docker load < /usr/rc_signal/rc_signal.c.tar"
 
-- name: Run
+- name: Copy run script
   become: true
   become_user: root
-  script: ./scripts/run.sh
+  copy:
+    src: scripts/run.sh
+    mode: 0700
+    dest: /tmp
+    force: yes
+
+- name: run
+  become: true
+  become_user: root
+  no_log: true
+  shell: "export POSTGRES_PASSWORD='{{pg_pw}}'; /tmp/run.sh"
 

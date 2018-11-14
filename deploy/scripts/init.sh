@@ -1,4 +1,8 @@
 #!/bin/bash
+export TZ=Australia/Melbourne
+sudo su root -c "ln -snf /usr/share/zoneinfo/$TZ /etc/localtime"
+sudo su root -c "echo $TZ > /etc/timezone"
+sudo su root -c "dpkg-reconfigure -f noninteractive tzdata"
 
 sudo apt-get update
 sudo apt-get -y install python

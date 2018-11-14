@@ -9,6 +9,7 @@ export PROJECT_PREFIX="ROCKETRC"
 
 ####################################################################
 # Do not modify these env variables
+export ROCKETRC_ROOT="$PARENT_DIRECTORY_OF_REPO/rocket_rc"
 export ROCKETRC_SEVERS_SSH_CONFIG="$PARENT_DIRECTORY_OF_REPO/rocket_rc/deploy/ansible/ssh_config"
 export ROCKETRC_ANSIBLE_HOSTS="$PARENT_DIRECTORY_OF_REPO/rocket_rc/deploy/ansible/hosts"
 export ROCKETRC_CLUSTER_VARIABLES="$PARENT_DIRECTORY_OF_REPO/rocket_rc/deploy/ansible/cluster_vars/main.yml"

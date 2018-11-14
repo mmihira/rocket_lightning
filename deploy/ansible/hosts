@@ -7,3 +7,9 @@ rocket_rc
 [rc_signal]
 rocket_rc
 
+[postgres]
+rocket_rc
+
+[global_env]
+rocket_rc
+

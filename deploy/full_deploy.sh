@@ -1,4 +1,5 @@
 #!/bin/bash
+rm -rf ~/.ansible/*
 
 containsElement () {
   local e match="$1"
@@ -17,15 +18,16 @@ ansible_config="$PROJECT_PREFIX""_ANSIBLE_CONFIG"
 export ANSIBLE_CONFIG=${!ansible_config}
 node_config="$PROJECT_PREFIX""_BOTO_CONFIG_FILE"
 deployed_node_config="$PROJECT_PREFIX""_BOTO_DEPLOYED_CONFIG_FILE"
+root="$PROJECT_PREFIX""_ROOT"
 
 # Create the instances
-python  ./boto/launch_instances.py
+# python  ./boto/launch_instances.py
 
-# Wait for ssh connectivity
-python ./boto/wait_for_sshd.py
+# # Wait for ssh connectivity
+# python ./boto/wait_for_sshd.py
 
-# Do initial installs
-python ./boto/init_install.py
+# # Do initial installs
+# python ./boto/init_install.py
 
 # Delete temporary pyc files
 rm boto/lib/*.pyc
@@ -34,8 +36,9 @@ rm ansible/*.retry
 rm ansible/playbooks/*.retry
 
 to_run=( \
-        "docker" \
-        "global_env" \
+        # "docker" \
+        # "global_env" \
+        # "pg" \
         "rc_signal" \
         )
 
@@ -66,7 +69,7 @@ containsElement "rc_signal" "${to_run[@]}"
 if [ $? -eq 0 ]; then
   echo "Installing rc_signal"
   echo "--------------------------------------------------------------"
-  ./ansible/roles/rc_signal/scripts/tar_context.sh
+  ( cd "${!root}"; cargo make save_docker_build_rc_signal )
   ansible-playbook -s ./ansible/playbooks/rc_signal.yml \
                     -i "${!ansible_hosts}" \
                     --ssh-common-args="-F ${!ssh_config}" \
@@ -75,4 +78,16 @@ if [ $? -eq 0 ]; then
                     --extra-vars "@${!deployed_node_config}"
 fi
 
-
+containsElement "pg" "${to_run[@]}"
+if [ $? -eq 0 ]; then
+  echo "Installing postgres"
+  echo "--------------------------------------------------------------"
+  ./ansible/roles/postgres/scripts/tar_context.sh
+  ( cd "${!root}"; cargo make save_docker_build_diesel_cli )
+  ansible-playbook -s ./ansible/playbooks/postgres.yml \
+                    -i "${!ansible_hosts}" \
+                    --ssh-common-args="-F ${!ssh_config}" \
+                    --vault-password-file "${!vault_key_file}" \
+                    --extra-vars "@${!vault_file}" \
+                    --extra-vars "@${!deployed_node_config}"
+fi
