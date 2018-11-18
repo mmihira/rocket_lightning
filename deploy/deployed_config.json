@@ -6,16 +6,17 @@
         "docker", 
         "global_env", 
         "postgres", 
-        "rc_signal"
+        "rc_signal", 
+        "rc_server"
       ], 
       "attach_volume": false, 
       "env_injection": [
         "INST_NAME=rocket_rc"
       ], 
-      "ip_address": "13.238.154.172", 
-      "private_dns_name": "ip-172-31-26-189.ap-southeast-2.compute.internal", 
-      "private_ip_address": "172.31.26.189", 
-      "public_dns_name": "ec2-13-238-154-172.ap-southeast-2.compute.amazonaws.com", 
+      "ip_address": "13.211.212.30", 
+      "private_dns_name": "ip-172-31-29-176.ap-southeast-2.compute.internal", 
+      "private_ip_address": "172.31.29.176", 
+      "public_dns_name": "ec2-13-211-212-30.ap-southeast-2.compute.amazonaws.com", 
       "security_groups": [
         "ssh2"
       ], 

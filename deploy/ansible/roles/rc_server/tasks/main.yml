@@ -2,42 +2,42 @@
 - name: remove
   become: true
   become_user: root
-  shell: rm -rf /usr/rc_signal | mkdir -p /usr/rc_signal/
+  shell: rm -rf /usr/rc_server | mkdir -p /usr/rc_server/
 
 - name: make
   become: true
   become_user: root
-  shell: mkdir -p /usr/rc_signal/
+  shell: mkdir -p /usr/rc_server/
 
 - name: Copy archives
   become: true
   become_user: root
   copy:
-    src: /tmp/rc_signal_tar/rc_signal.tar
-    dest: /usr/rc_signal/rc_signal.tar
+    src: /tmp/rc_server_tar/rc_server.tar
+    dest: /usr/rc_server/rc_server.tar
     force: yes
 
 - name: Unarchive
   become: true
   become_user: root
-  shell: tar -Pzxvf /usr/rc_signal/rc_signal.tar -C /usr/rc_signal/
+  shell: tar -Pzxvf /usr/rc_server/rc_server.tar -C /usr/rc_server/
 
 - name: Stop
   become: true
   become_user: root
-  shell: "docker stop rc_signal"
+  shell: "docker stop rc_server"
   ignore_errors: yes
 
 - name: Remove
   become: true
   become_user: root
-  shell: "docker rm rc_signal"
+  shell: "docker rm rc_server"
   ignore_errors: yes
 
 - name: Docker build
   become: true
   become_user: root
-  shell: "docker load < /usr/rc_signal/rc_signal.c.tar"
+  shell: "docker load < /usr/rc_server/rc_server.c.tar"
 
 - name: Copy run script
   become: true
@@ -51,6 +51,6 @@
 - name: run
   become: true
   become_user: root
-  no_log: true
   shell: "export POSTGRES_PASSWORD='{{pg_pw}}'; /tmp/run.sh"
+
 

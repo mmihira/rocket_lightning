@@ -1,5 +1,5 @@
 Host rocket_rc
-  HostName 13.238.154.172
+  HostName 13.211.212.30
   User ubuntu
   IdentityFile /home/mihira/.ssh/rocket_rc/rocket_rc.pem
 

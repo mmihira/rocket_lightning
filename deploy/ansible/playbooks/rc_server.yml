@@ -1,0 +1,4 @@
+---
+- hosts: 'rc_server'
+  roles:
+    - ../roles/rc_server

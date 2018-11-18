@@ -6,7 +6,6 @@ ARG p_dir
 RUN USER=root cargo new --bin server/ctx
 WORKDIR /server/ctx
 
-
 # copy over your manifests
 COPY ./${p_dir}/Cargo.lock ./Cargo.lock
 COPY ./${p_dir}/Cargo.toml ./Cargo.toml
@@ -29,7 +28,8 @@ COPY ./entrypoint.sh ./
 RUN cargo build --release
 
 # Final image
-FROM postgres:9.6.10
+FROM ubuntu:bionic
+RUN apt-get update && apt-get -y install libpq5 tzdata
 ENV TZ=Australia/Melbourne
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
  && echo $TZ > /etc/timezone \
@@ -41,4 +41,4 @@ COPY --from=build /server/ctx/Rocket.toml .
 COPY --from=build /server/ctx/entrypoint.sh .
 
 # set the startup command to run your binary
-CMD ["./entrypoint.sh"]
+CMD "./server"

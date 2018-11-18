@@ -132,6 +132,18 @@ script = [
 '''
 ]
 
+[tasks.save_docker_build_rc_server]
+dependencies = ["docker_build_rc_server"]
+script = [
+'''
+	[ -e /tmp/rc_server_tar  ] && rm -rf /tmp/rc_server_tar
+	mkdir -p /tmp/rc_server_tar
+	docker save rc_server -o /tmp/rc_server_tar/rc_server.c.tar
+	cd /tmp/rc_server_tar
+	tar -zvcf rc_server.tar ./rc_server.c.tar
+'''
+]
+
 [tasks.run_rc_signal_docker]
 script = [
 '''

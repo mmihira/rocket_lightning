@@ -12,7 +12,8 @@
         "docker",
         "global_env",
         "postgres",
-        "rc_signal"
+        "rc_signal",
+        "rc_server"
       ],
       "env_injection": [
         "INST_NAME=rocket_rc"

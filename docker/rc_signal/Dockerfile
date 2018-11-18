@@ -19,7 +19,6 @@ RUN rm src/*
 COPY ./${p_dir}/src ./src
 COPY ./${p_dir}/config.json ./
 COPY ./${p_dir}/diesel.toml ./
-COPY ./${p_dir}/migrations ./migrations
 COPY ./entrypoint.sh ./
 
 # build for release

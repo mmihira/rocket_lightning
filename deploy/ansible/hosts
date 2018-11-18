@@ -1,6 +1,9 @@
 [all]
 rocket_rc
 
+[rc_server]
+rocket_rc
+
 [docker]
 rocket_rc
 

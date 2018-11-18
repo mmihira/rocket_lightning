@@ -76,5 +76,6 @@
 - name: run
   become: true
   become_user: root
+  no_log: true
   shell: "export POSTGRES_PASSWORD='{{pg_pw}}'; /tmp/run.sh"
 

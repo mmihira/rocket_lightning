@@ -14,6 +14,8 @@ extern crate r2d2;
 extern crate config as std_config;
 extern crate rc_models as models;
 extern crate analysis_range;
+// Docker alpine build req
+extern crate openssl;
 
 mod routes;
 pub mod config;
