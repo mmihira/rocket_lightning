@@ -108,6 +108,32 @@ script = [
 '''
 ]
 
+[tasks.build_rc_app]
+script = [
+'''
+	cd ./app
+	which nvm
+	yarn install
+	yarn run build
+'''
+]
+
+[tasks.docker_build_nginx]
+# dependencies= ["build_rc_app"]
+script = [
+'''
+	context_dir="/tmp/rc_nginx"
+	[ -e "$context_dir"  ] && rm -rf "$context_dir"
+	mkdir -p "$context_dir"
+	cp -r ./docker/nginx/* "$context_dir"
+	cp -r ./app/dist "$context_dir"
+	cd "$context_dir"
+	docker build  \
+		-t rc_nginx \
+		./
+'''
+]
+
 [tasks.docker_build_rc_server]
 env = { "MODE" = "NEW" }
 script = [
@@ -144,6 +170,20 @@ script = [
 '''
 ]
 
+[tasks.run_rc_nginx]
+script = [
+'''
+	docker run \
+		--name rc_nginx \
+		--restart always \
+  	--log-driver syslog \
+		-e RC_SERVER_HOST=rc_server \
+		--network=dev_rocket_net \
+		-p 7000:7000 \
+		rc_nginx
+'''
+]
+
 [tasks.run_rc_signal_docker]
 script = [
 '''
@@ -161,6 +201,7 @@ script = [
 script = [
 '''
 	docker run \
+  	--name rc_server \
 		--restart always \
   	--log-driver syslog \
 		-e RC_POSTGRES_HOST=postgres \

@@ -1,0 +1,52 @@
+body {
+  padding: 0px;
+  margin: 0px;
+}
+
+.divider {
+  width: 0.5%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  border: none;
+}
+
+.topDivider {
+  width: 100%;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  background: #E4E7EB;
+  border: none;
+}
+
+.bottomDivider {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #C7CED4;
+  border-left: 1px solid #C7CED4;
+  border-top: 1px solid #C7CED4;
+  flex-direction: row;
+  justify-content: flex-start;
+  background: #E4E7EB;
+}
+
+.dividerSplit {
+  width: 0px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #C7CED4;
+  flex-direction: row;
+  justify-content: center;
+  background: #E4E7EB;
+  margin-left: -1px;
+  boder: none;
+}
+

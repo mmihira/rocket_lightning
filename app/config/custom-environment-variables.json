@@ -1,0 +1,9 @@
+{
+  "EXPRESS": {
+    "PORT": "EXPRESS_PORT",
+    "BIND_ADDRESS": "BIND_ADDRESS"
+  },
+  "PGFAAS": {
+    "URL_BASE": "PGFAAS_API_URL"
+  }
+}
