@@ -119,14 +119,14 @@ script = [
 ]
 
 [tasks.docker_build_nginx]
-# dependencies= ["build_rc_app"]
+dependencies = ["docker_build_app"]
 script = [
 '''
 	context_dir="/tmp/rc_nginx"
 	[ -e "$context_dir"  ] && rm -rf "$context_dir"
 	mkdir -p "$context_dir"
 	cp -r ./docker/nginx/* "$context_dir"
-	cp -r ./app/dist "$context_dir"
+	cp -r /tmp/rc_app_o/dist "$context_dir"
 	cd "$context_dir"
 	docker build  \
 		-t rc_nginx \
@@ -155,6 +155,29 @@ script = [
 		--build-arg  p_dir=ctx \
 		--build-arg  mode=${MODE} \
 		./
+'''
+]
+
+[tasks.docker_build_app]
+script = [
+'''
+	context_dir="/tmp/rc_app"
+	[ -e "$context_dir"  ] && rm -rf "$context_dir"
+	mkdir -p "$context_dir"
+	cp ./docker/app_build/* "$context_dir"
+	cp -r ./app "$context_dir"
+	cd "$context_dir"
+	rm -rf ./node_modules
+	rm -rf ./dist
+	docker build  \
+		-t rc_app \
+		./
+	img=`docker create rc_app`
+	[ -e /tmp/rc_app_o/ && rm -rf /tmp/rc_app_o ]
+	mkdir -p /tmp/rc_app_o
+	echo $img
+	docker cp "$img":/app/dist /tmp/rc_app_o/
+	docker container rm "$img"
 '''
 ]
 
