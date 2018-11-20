@@ -29,6 +29,8 @@ Instructions are given for running locally as a docker environment
 
 Build rc_signal                 ` cargo make docker_build_rc_signal ` <br>
 Build the server                ` cargo make docker_build_rc_server ` <br>
+Build build the app             ` cargo make docker_build_app ` <br>
+Build nginx app server          ` cargo make docker_build_nginx ` <br>
 
 Start up postgres docker        ` cargo make docker_reset_db ` <br>
 Run the migrations for prod     ` cargo make database_reset_prod ` <br>
