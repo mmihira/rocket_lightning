@@ -16,11 +16,21 @@ extern crate rc_models as models;
 extern crate analysis_range;
 // Docker alpine build req
 extern crate openssl;
+extern crate ws;
+extern crate uuid;
+use uuid::Uuid;
 
 mod routes;
 pub mod config;
 mod graphql_schema;
+mod socket_server;
 
+use std::rc::Rc;
+use std::cell::RefCell;
+use std::sync::{Arc, Mutex};
+use std::collections::HashMap;
+use std::sync::atomic::AtomicBool;
+use std::{thread};
 use std_config::{File, FileFormat, Config, Environment};
 use diesel::r2d2::ConnectionManager;
 use diesel::pg::PgConnection;
@@ -51,6 +61,7 @@ fn get_db_pool(config: &config::Config ) -> r2d2::Pool<ConnectionManager<PgConne
         .unwrap()
 }
 
+
 fn main() {
     let config_result = get_config();
     if let Err(err) = config_result {
@@ -58,8 +69,30 @@ fn main() {
         return;
     }
     let config = config_result.unwrap();
-
     let pg_pool = get_db_pool(&config);
+    let pg_pool_clone_for_websocket = pg_pool.clone();
+    let websocket_address = format!("{}:{}",
+        config.postgres.wshost,
+        config.postgres.wsport
+        );
+
+    thread::spawn(move || {
+        let registry = Arc::new(Mutex::new(HashMap::new()));
+
+        ws::listen(
+            websocket_address,
+            |out| {
+                let new_id =  Uuid::new_v4();
+                info!("Starting ws_conn for {}", new_id);
+                socket_server::Server {
+                    out: out,
+                    this_id: format!("{}", new_id),
+                    registry: registry.clone(),
+                    pool: pg_pool_clone_for_websocket.clone()
+                }
+            }).unwrap()
+    });
+
     rocket::ignite()
         .mount("/", routes![
             routes::graphiql,

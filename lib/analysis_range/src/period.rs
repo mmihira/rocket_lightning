@@ -6,7 +6,8 @@ use super::range::{Range};
 pub enum Period {
     OneMin = 1isize,
     FifteenMin = 2isize,
-    ThirtyMin = 3isize
+    ThirtyMin = 3isize,
+    Hour = 4isize
 }
 
 pub type PeriodId = i32;
@@ -25,6 +26,7 @@ impl PeriodIdentity for PeriodId {
             _ if self == (Period::OneMin as i32) => Period::OneMin,
             _ if self == (Period::FifteenMin as i32) => Period::FifteenMin,
             _ if self == (Period::ThirtyMin as i32) => Period::ThirtyMin,
+            _ if self == (Period::Hour as i32) => Period::Hour,
             _ => panic!("not a period")
         }
     }
@@ -45,7 +47,8 @@ impl PeriodDuration for Period {
         match self {
             Period::OneMin => 60,
             Period::FifteenMin => 900,
-            Period::ThirtyMin => 1800
+            Period::ThirtyMin => 1800,
+            Period::Hour => 3600
         }
     }
 }

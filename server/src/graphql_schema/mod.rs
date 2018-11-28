@@ -7,7 +7,6 @@ use ::juniper;
 use ::r2d2;
 
 pub struct Context {
-    // Use your real database pool here.
     pub pool: r2d2::Pool<ConnectionManager<PgConnection>>
 }
 
@@ -17,9 +16,20 @@ impl juniper::Context for Context {}
 pub struct Query;
 
 graphql_object!(Context: Context as "Query" |&self| {
-
     field apiVersion() -> &str {
         "1.0"
+    }
+
+    field trade(&executor, from: String, to: String) -> FieldResult<Vec<models::Trade>> {
+        let context = executor.context();
+        let conn = context.pool.get()?;
+        let trades = models::Trade::in_timestamp_range(
+            &conn,
+            from.parse::<i64>()?,
+            to.parse::<i64>()?
+        )?;
+
+        Ok(trades)
     }
 
     // Arguments to resolvers can either be simple types or input objects.

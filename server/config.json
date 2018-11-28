@@ -4,13 +4,17 @@
     "password": "exampl",
     "database": "rocket_rc",
     "port": 5432,
-    "host": "10.13.182.218",
+    "wshost": "0.0.0.0",
+    "wsport": 3012,
+    "host": "localhost",
     "no_attempt_reconnect_startup": 10
   },
   "postgres_test": {
     "user_name": "postgres",
     "password": "exampl",
     "database": "rocket_rc_test",
+    "wshost": "0.0.0.0",
+    "wsport": 3012,
     "port": 5432,
     "host": "10.13.182.218",
     "no_attempt_reconnect_startup": 10

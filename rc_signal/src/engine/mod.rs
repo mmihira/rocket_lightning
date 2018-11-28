@@ -50,6 +50,7 @@ impl<'a> Engine<'a> {
         self.do_range(Period::OneMin);
         self.do_range(Period::FifteenMin);
         self.do_range(Period::ThirtyMin);
+        self.do_range(Period::Hour);
     }
 
     fn do_range(&self, period: Period) {
@@ -137,7 +138,7 @@ impl<'a> Engine<'a> {
             self.conn,
             range.range_start(),
             range.range_end()
-            );
+            ).unwrap()
 
         let mut vol = 0f32;
         let mut high: f32 = 0f32;
@@ -319,7 +320,7 @@ mod tests {
         Candle::deleteAllRecords(&conn);
         let engine = super::Engine::new(&conn);
         engine.calculate_candle_for_range(&REF_RANGE);
-        let trades = Trade::in_timestamp_range(&conn, 1538718120, 1538718180);
+        let trades = Trade::in_timestamp_range(&conn, 1538718120, 1538718180).unwrap();
 
         assert_eq!(trades.len(), 1);
     }
@@ -334,7 +335,7 @@ mod tests {
         let engine = super::Engine::new(&conn);
         engine.calculate_candle_for_range(&REF_RANGE);
         engine.calculate_candle_for_range(&NEXT_REF_RANGE);
-        let trades = Trade::in_timestamp_range(&conn, 1538718180, 1538718240);
+        let trades = Trade::in_timestamp_range(&conn, 1538718180, 1538718240).unwrap();
 
         // No trades in the missing duration
         assert_eq!(trades.len(), 0);

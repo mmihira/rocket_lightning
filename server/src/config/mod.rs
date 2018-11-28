@@ -3,6 +3,8 @@ pub struct Postgres {
     pub user_name: String,
     pub password: String,
     pub database: String,
+    pub wshost: String,
+    pub wsport: String,
     pub port: i32,
     pub host: String,
     pub no_attempt_reconnect_startup: i32

@@ -5,7 +5,6 @@ ARG p_dir
 RUN USER=root cargo new --bin /home/rust/rc_signal/ctx
 WORKDIR /home/rust/rc_signal/ctx
 # copy over your manifests
-COPY ./${p_dir}/Cargo.lock ./Cargo.lock
 COPY ./${p_dir}/Cargo.toml ./Cargo.toml
 COPY ./${p_dir}/rust-toolchain ./
 COPY ./lib ./../lib

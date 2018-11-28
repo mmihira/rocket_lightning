@@ -223,6 +223,7 @@ script = [
 [tasks.run_rc_server_docker]
 script = [
 '''
+	docker rm rc_server
 	docker run \
   	--name rc_server \
 		--restart always \
@@ -230,6 +231,7 @@ script = [
 		-e RC_POSTGRES_HOST=postgres \
 		--network=dev_rocket_net \
 		-p 8000:8000 \
+		-p 3012:3012 \
 		-d \
 		rc_server
 '''

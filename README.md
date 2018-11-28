@@ -23,6 +23,13 @@ You will need the diesel-cli and cargo make
   cargo install --force cargo-make
 ````
 
+You will need a local installation of openssl, libssl-dev, and libpq5-dev
+For Debian
+````
+  sudo apt update
+  sudo apt install openssl libssl-dev libpq5-dev
+````
+
 ## Usage
 
 Instructions are given for running locally as a docker environment

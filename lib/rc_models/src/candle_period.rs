@@ -18,6 +18,7 @@ impl CandlePeriod {
             Self {id: Period::OneMin as i32, period_name: String::from("one_min")},
             Self {id: Period::ThirtyMin as i32, period_name: String::from("thirty_min")},
             Self {id: Period::FifteenMin as i32, period_name: String::from("fifteen_min")},
+            Self {id: Period::Hour as i32, period_name: String::from("hour")},
         ];
 
         periods
