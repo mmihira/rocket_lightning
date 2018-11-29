@@ -77,7 +77,7 @@ fn main() {
         );
 
     thread::spawn(move || {
-        let registry = Arc::new(Mutex::new(HashMap::new()));
+        let registry: socket_server::Registry = Rc::new(RefCell::new(HashMap::new()));
 
         ws::listen(
             websocket_address,
