@@ -25,26 +25,19 @@ const config = convict({
     env: 'BIND_ADDRESS',
     arg: 'bind_address'
   },
-  pgfaas_api_url: {
+  rc_server_url: {
     doc: 'The pgFaas API URL.',
     format: 'url',
-    default: 'http://pgfaas.aurin.org.au/api',
-    env: 'PGFAAS_API_URL',
-    arg: 'pgfaas_api_url'
+    default: 'localhost:8000',
+    env: 'RC_SERVER_URL',
+    arg: 'rc_server_url'
   },
-  disable_delete: {
-    doc: 'Disable the delete function and delete namespace functionalities.',
-    format: 'Boolean',
-    default: false,
-    env: 'DISABLE_DELETE',
-    arg: 'disable_delete'
-  },
-  protected_namespaces: {
-    doc: 'Prevent update of specified namespaces',
-    format: 'String',
-    default: "[]",
-    env: 'PROTECTED_NAMESPACES',
-    arg: 'protected_namespaces'
+  rc_ws_url: {
+    doc: 'The host:port where the websocket server is located',
+    format: 'url',
+    default: 'localhost:3012',
+    env: 'RC_WS_URL',
+    arg: 'rc_ws_url'
   }
 });
 

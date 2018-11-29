@@ -1,9 +1,9 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types';
-import act from './../../actions/index.js';
+import act from 'actions';
 import './styles/app.css';
-import TopBar from '../TopBar';
+import TopBar from 'features/TopBar';
 
 class App extends React.Component {
   constructor (props) {

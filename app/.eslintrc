@@ -11,7 +11,8 @@
     "sinon": true,
     "__DEV__": true,
     "DISABLE_DELETE": true,
-    "PROTECTED_NAMESPACES": true
+    "RC_SERVER_URL": true,
+    "RC_WS_URL": true
   },
   "parserOptions": {
     "ecmaFeatures": {

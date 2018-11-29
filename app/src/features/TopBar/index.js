@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pane, Heading} from 'evergreen-ui';
 import '@fortawesome/fontawesome-free/css/all.css';
-import elIcon from '../../assets/elephant.svg';
+import elIcon from 'assets/elephant.svg';
 
 class TopBar extends React.Component {
   constructor (props) {

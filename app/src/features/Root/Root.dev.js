@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {Provider} from 'react-redux';
-import App from '../features/App';
+import App from 'features/App';
 
 export default function Root ({store}) {
   return (

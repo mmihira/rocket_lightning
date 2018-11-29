@@ -17,6 +17,12 @@ module.exports = {
     filename: '[name].js',
     publicPath: '/'
   },
+  resolve: {
+    modules: [
+      path.resolve('./src'),
+      path.resolve('./node_modules')
+    ]
+  },
   plugins: [
     new webpack.LoaderOptionsPlugin({
       options: {
@@ -37,10 +43,10 @@ module.exports = {
       'process.env.NODE_ENV': JSON.stringify('development')
     }),
     new webpack.DefinePlugin({
-      DISABLE_DELETE: config.disable_delete || JSON.parse(false)
+      RC_SERVER_URL: JSON.stringify(config.rc_server_url)
     }),
     new webpack.DefinePlugin({
-      PROTECTED_NAMESPACES: JSON.stringify(config.protected_namespaces) || JSON.parse([])
+      RC_WS_URL: JSON.stringify(config.rc_ws_url)
     })
   ],
   node: {

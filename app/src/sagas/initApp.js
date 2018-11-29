@@ -1,4 +1,4 @@
-import * as types from './../actions/types.js';
+import * as types from 'actions/types.js';
 import { take } from 'redux-saga/effects';
 
 const initApp = function* _initApp () {

@@ -7,7 +7,8 @@
     "test": "jest",
     "build-dev": "rimraf dist && webpack --watch --config ./webpack.config.js --progress --colors --mode development",
     "build": "rimraf dist && NODE_ENV=production webpack --config ./webpack.production.config.js --progress --profile --colors --mode production",
-    "eslint": "eslint ."
+    "eslint": "eslint .",
+    "start": "node server"
   },
   "author": "",
   "license": "Apache-2.0",

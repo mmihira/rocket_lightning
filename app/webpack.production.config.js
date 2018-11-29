@@ -69,10 +69,10 @@ module.exports = {
             'process.env.NODE_ENV': JSON.stringify('production')
         }),
         new webpack.DefinePlugin({
-          DISABLE_DELETE: config.disable_delete || JSON.parse(false)
+          RC_SERVER_URL: config.rs_server_url
         }),
         new webpack.DefinePlugin({
-          PROTECTED_NAMESPACES: JSON.stringify(config.protected_namespaces) || JSON.parse([])
+          RC_WS_URL: JSON.stringify(config.rc_ws_url)
         })
     ],
     node: {
