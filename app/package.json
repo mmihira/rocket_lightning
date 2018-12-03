@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build-dev": "rimraf dist && webpack --watch --config ./webpack.config.js --progress --colors --mode development",
+    "build-dev": "rimraf dist && NODE_ENV=development webpack --watch --config ./webpack.config.js --progress --colors",
     "build": "rimraf dist && NODE_ENV=production webpack --config ./webpack.production.config.js --progress --profile --colors --mode production",
     "eslint": "eslint .",
-    "start": "node server"
+    "start": "NODE_ENV=development node server --watch"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -21,9 +21,6 @@
     "url": "https://github.com/AURIN/rc-ui"
   },
   "devDependencies": {
-    "webpack-bundle-analyzer": "^2.13.1",
-    "webpack-dev-middleware": "^3.4.0",
-    "webpack-dev-server": "^2.9.2",
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-export-namespace-from": "^7.0.0",
@@ -39,7 +36,6 @@
     "babel-jest": "^23.6.0",
     "babel-loader": "^8.0.4",
     "child-process-promise": "^2.2.1",
-    "codemirror": "^5.40.2",
     "config": "^2.0.1",
     "css-loader": "^0.28.5",
     "eslint": "^4.17.0",
@@ -65,7 +61,6 @@
     "react-redux": "^4.4.5",
     "react-router-dom": "^4.1.1",
     "react-router-redux": "next",
-    "react-treebeard": "^3.1.0",
     "redux": "^3.5.2",
     "redux-saga": "^0.16.0",
     "redux-saga-test-plan": "^3.7.0",
@@ -77,12 +72,16 @@
     "uglifyjs-webpack-plugin": "^1.2.7",
     "url-loader": "^0.5.7",
     "webpack": "^4.21.0",
-    "webpack-cli": "^3.1.2"
+    "webpack-bundle-analyzer": "^2.13.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-middleware": "^3.4.0",
+    "webpack-dev-server": "^2.9.2"
   },
   "dependencies": {
-    "express-pino-logger": "^4.0.0",
-    "convict": "^4.4.0",
     "body-parser": "^1.18.3",
+    "convict": "^4.4.0",
+    "d3": "^5.7.0",
+    "express-pino-logger": "^4.0.0",
     "pino": "^5.8.0",
     "rimraf": "^2.5.2"
   }

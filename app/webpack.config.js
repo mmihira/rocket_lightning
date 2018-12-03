@@ -7,6 +7,9 @@ const config = require('./config/config.js').getProperties();
 module.exports = {
   devtool: 'eval-source-map',
   watch: true,
+  watchOptions: {
+    poll: true
+  },
   mode: 'development',
   entry: [
     '@babel/polyfill',
