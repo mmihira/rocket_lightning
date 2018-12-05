@@ -223,6 +223,7 @@ script = [
 [tasks.run_rc_server_docker]
 script = [
 '''
+	docker stop rc_server
 	docker rm rc_server
 	docker run \
   	--name rc_server \

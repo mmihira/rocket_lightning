@@ -61,7 +61,6 @@ fn get_db_pool(config: &config::Config ) -> r2d2::Pool<ConnectionManager<PgConne
         .unwrap()
 }
 
-
 fn main() {
     let config_result = get_config();
     if let Err(err) = config_result {

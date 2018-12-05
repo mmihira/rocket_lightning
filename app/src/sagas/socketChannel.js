@@ -26,7 +26,7 @@ const watchSocket = function* watchSocket () {
     const socketChannel = yield call(createSocketChannel, socket);
     while (true) {
       const payload = yield take(socketChannel);
-      yield put({ type: 'hello', payload });
+      yield put(act.newSocketData(payload));
     }
   }
 };

@@ -6,16 +6,15 @@ import './styles/app.css';
 import TopBar from 'features/TopBar';
 import * as d3 from 'd3';
 
-function foo () {
+function createHistChart (data) {
+  d3.select('#chartEl').select('svg').remove();
+
   const color = 'steelblue';
   const height = 500;
   const width = 800;
   const margin = {top: 20, right: 20, bottom: 30, left: 40};
-  // const formatCount = d3.format(',.0f');
 
-  const data = d3.range(1000).map(d3.randomNormal(20, 5));
-
-  const x = d3.scaleLinear()
+  const x = d3.scaleLog()
     .domain(d3.extent(data))
     .range([0, width]);
 
@@ -69,15 +68,10 @@ function foo () {
 class App extends React.Component {
   constructor (props) {
     super(props);
-    this.x = foo;
   }
 
-  componentDidMount () {
-    foo();
-  }
-
-  componentWillReceiveProps (nextProps) {
-    nextProps;
+  componentDidUpdate () {
+    createHistChart(this.props.histChart.vol);
   }
 
   render () {
@@ -97,12 +91,13 @@ const mapDispatchToProps = dispatch => {
 };
 
 const mapStateToProps = state => {
-  state;
-  return {};
+  const { histChart } = state;
+  return { histChart };
 };
 
 App.propTypes = {
-  setAppDimensions: PropTypes.func
+  setAppDimensions: PropTypes.func,
+  histChart: PropTypes.object
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

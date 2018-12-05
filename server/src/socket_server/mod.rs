@@ -70,7 +70,7 @@ impl Handler for Server {
                             }
                         }
                         let range = analysis_range::Range::new(Period::OneMin);
-                        let time_range = range.get_prev_period_time_range(10);
+                        let time_range = range.get_prev_period_time_range(2);
                         let res = Trade::in_timestamp_range(&conn, time_range.start_timestamp, time_range.end_timestamp)
                             .map_err(|err: diesel::result::Error| {
                                 ws::Error{
